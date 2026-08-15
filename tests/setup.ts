@@ -1,6 +1,53 @@
 import { afterEach, vi } from 'vitest'
 import '@testing-library/jest-dom'
 
+// 0. Environment Mock for Test Isolation
+if (typeof process !== 'undefined' && process.env) {
+  process.env.VITE_SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://flicvngoruzbaurvkcox.supabase.co'
+  process.env.VITE_SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-anon-key'
+  process.env.VITE_APP_URL = process.env.VITE_APP_URL || 'http://localhost:5173'
+}
+
+if (typeof import.meta !== 'undefined' && import.meta.env) {
+  import.meta.env.VITE_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://flicvngoruzbaurvkcox.supabase.co'
+  import.meta.env.VITE_SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-anon-key'
+  import.meta.env.VITE_APP_URL = import.meta.env.VITE_APP_URL || 'http://localhost:5173'
+}
+
+// Mock fetch to prevent happy-dom real network requests or DNS resolution failures during tests
+const mockFetchImpl = vi.fn().mockImplementation(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    statusText: 'OK',
+    json: async () => ({}),
+    text: async () => '',
+    blob: async () => new Blob(),
+    headers: new Headers(),
+  } as unknown as Response)
+)
+
+globalThis.fetch = mockFetchImpl
+if (typeof window !== 'undefined') {
+  window.fetch = mockFetchImpl
+}
+
+// Prevent iframe automatic network navigation in happy-dom
+if (typeof HTMLIFrameElement !== 'undefined') {
+  Object.defineProperty(HTMLIFrameElement.prototype, 'src', {
+    set(_val: string) {},
+    get() {
+      return ''
+    },
+    configurable: true,
+  })
+  const originalSetAttribute = HTMLIFrameElement.prototype.setAttribute
+  HTMLIFrameElement.prototype.setAttribute = function (name: string, value: string) {
+    if (name.toLowerCase() === 'src') return
+    originalSetAttribute.call(this, name, value)
+  }
+}
+
 // 1. matchMedia Mock with prefers-reduced-motion control
 let reducedMotionPreference = false
 

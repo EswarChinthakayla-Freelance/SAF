@@ -1,6 +1,10 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => useAuthStore(),
+}))
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import { useAuthStore } from '@/stores/authStore'

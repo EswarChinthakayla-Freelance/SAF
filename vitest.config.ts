@@ -10,6 +10,13 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/{unit,integration,security}/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'node_modules/**'],
+    env: {
+      VITE_SUPABASE_URL: 'https://mock-project.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-anon-key',
+      VITE_APP_URL: 'http://localhost:5173',
+    },
+    testTimeout: 10000,
+    hookTimeout: 10000,
   },
   resolve: {
     alias: {

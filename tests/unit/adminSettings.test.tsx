@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AdminSettingsPage } from '@/pages/admin/AdminSettingsPage'
@@ -70,10 +70,13 @@ describe('AdminSettingsPage Component', () => {
     vi.clearAllMocks()
   })
 
-  it('renders ChatGPT-style category navigation and general settings by default', () => {
+  it('renders ChatGPT-style category navigation and general settings by default', async () => {
     renderSettingsPage()
 
-    expect(screen.getAllByRole('button', { name: /General/i })[0]).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /General/i })[0]).toBeDefined()
+    })
+
     expect(screen.getAllByRole('button', { name: /Brand & Logo/i })[0]).toBeDefined()
     expect(screen.getAllByRole('button', { name: /Contact & Concierge/i })[0]).toBeDefined()
     expect(screen.getAllByRole('button', { name: /Showroom Hours/i })[0]).toBeDefined()
@@ -82,8 +85,12 @@ describe('AdminSettingsPage Component', () => {
     expect(screen.getByDisplayValue('Bespoke Solid Wood Craftsmanship')).toBeDefined()
   })
 
-  it('switches active category when category navigation item is clicked', () => {
+  it('switches active category when category navigation item is clicked', async () => {
     renderSettingsPage()
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /Contact/i })[0]).toBeDefined()
+    })
 
     const contactBtn = screen.getAllByRole('button', { name: /Contact/i })[0]
     fireEvent.click(contactBtn)
@@ -93,8 +100,12 @@ describe('AdminSettingsPage Component', () => {
     expect(screen.getByDisplayValue('+91 98765 43210')).toBeDefined()
   })
 
-  it('renders structured showroom hours in showroom category', () => {
+  it('renders structured showroom hours in showroom category', async () => {
     renderSettingsPage()
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /Showroom Hours/i })[0]).toBeDefined()
+    })
 
     const showroomBtn = screen.getAllByRole('button', { name: /Showroom Hours/i })[0]
     fireEvent.click(showroomBtn)
@@ -104,8 +115,12 @@ describe('AdminSettingsPage Component', () => {
     expect(screen.getByDisplayValue('10:00 AM – 2:00 PM')).toBeDefined()
   })
 
-  it('submits updated settings through sticky save bar', () => {
+  it('submits updated settings through sticky save bar', async () => {
     renderSettingsPage()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('Sri Anjaneya Furnitures')).toBeDefined()
+    })
 
     const nameInput = screen.getByDisplayValue('Sri Anjaneya Furnitures')
     fireEvent.change(nameInput, { target: { value: 'Sri Anjaneya Furnitures Ltd' } })
@@ -113,17 +128,23 @@ describe('AdminSettingsPage Component', () => {
     const saveBtn = screen.getByRole('button', { name: /Save Changes/i })
     fireEvent.click(saveBtn)
 
-    expect(mockUpdateSettings).toHaveBeenCalledWith(
-      expect.objectContaining({
-        settings: expect.objectContaining({
-          brand_name: 'Sri Anjaneya Furnitures Ltd',
-        }),
-      })
-    )
+    await waitFor(() => {
+      expect(mockUpdateSettings).toHaveBeenCalledWith(
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            brand_name: 'Sri Anjaneya Furnitures Ltd',
+          }),
+        })
+      )
+    })
   })
 
-  it('switches to Featured Pieces category and displays featured items showcase', () => {
+  it('switches to Featured Pieces category and displays featured items showcase', async () => {
     renderSettingsPage()
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: /Featured Pieces/i })[0]).toBeDefined()
+    })
 
     const featuredBtn = screen.getAllByRole('button', { name: /Featured Pieces/i })[0]
     fireEvent.click(featuredBtn)

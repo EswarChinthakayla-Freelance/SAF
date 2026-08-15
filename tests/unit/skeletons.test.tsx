@@ -11,8 +11,8 @@ describe('Domain Skeleton Components', () => {
   it('renders ProductCardSkeleton with 4:5 image ratio container', () => {
     const { container } = render(<ProductCardSkeleton />)
     const imageContainer = container.querySelector('.aspect-\\[4\\/5\\]')
-    expect(imageContainer).toBeDefined()
-    expect(container.getAttribute('aria-hidden')).toBe('true')
+    expect(imageContainer).not.toBeNull()
+    expect(container.firstElementChild?.getAttribute('aria-hidden')).toBe('true')
   })
 
   it('renders ProductGridSkeleton with role status and requested card count', () => {

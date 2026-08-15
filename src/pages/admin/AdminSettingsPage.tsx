@@ -8,6 +8,13 @@ import { getMediaUrl } from '@/lib/media'
 import { supabase } from '@/lib/supabase'
 import { useAdminProducts } from '@/hooks/queries/useProducts'
 import type { SiteSettingsUpdate } from '@/types/app'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 type SettingsCategory =
   | 'general'
@@ -564,20 +571,23 @@ export const AdminSettingsPage: React.FC = () => {
                   Add Product to Featured Showcase
                 </label>
                 <div className="flex flex-col sm:flex-row items-center gap-3">
-                  <select
+                  <Select
                     value={selectedAddProductId}
-                    onChange={(e) => setSelectedAddProductId(e.target.value)}
-                    className="w-full bg-[#111111] border border-[#2A2A2A] rounded-none px-4 py-2.5 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
+                    onValueChange={(val) => setSelectedAddProductId(val || '')}
                   >
-                    <option value="">Select a published piece...</option>
-                    {(productsData?.products || [])
-                      .filter((p) => !featuredProductIds.includes(p.id))
-                      .map((prod) => (
-                        <option key={prod.id} value={prod.id}>
-                          {prod.name} ({prod.product_code || prod.slug}) — ₹{prod.price.toLocaleString('en-IN')}
-                        </option>
-                      ))}
-                  </select>
+                    <SelectTrigger className="w-full bg-[#111111] border border-[#2A2A2A] text-[#F5F0E8] h-10 px-4 focus:border-[#C9A84C]">
+                      <SelectValue placeholder="Select a published piece..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#111111] border border-[#2A2A2A] text-[#F5F0E8]">
+                      {(productsData?.products || [])
+                        .filter((p) => !featuredProductIds.includes(p.id))
+                        .map((prod) => (
+                          <SelectItem key={prod.id} value={prod.id}>
+                            {prod.name} ({prod.product_code || prod.slug}) — ₹{prod.price.toLocaleString('en-IN')}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                   <GoldButton
                     type="button"
                     size="sm"
