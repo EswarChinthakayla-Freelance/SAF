@@ -17,7 +17,7 @@ export interface PageMetaProps {
 export const PageMeta: React.FC<PageMetaProps> = ({
   title,
   description = 'Sri Anjaneya Furnitures — Handcrafted bespoke solid wood furniture, architectural collections, and tailored quotes.',
-  ogImage = '/og-image.jpg',
+  ogImage = '/og-image.png',
   ogType = 'website',
   canonicalUrl,
   noIndex = false,
@@ -46,7 +46,7 @@ export const PageMeta: React.FC<PageMetaProps> = ({
     // 2. Meta Description
     setMetaTag('name', 'description', description)
 
-    // 3. Open Graph Tags
+    // 3. Open Graph & Twitter Card Tags
     setMetaTag('property', 'og:title', fullTitle)
     setMetaTag('property', 'og:description', description)
     setMetaTag('property', 'og:type', ogType)
@@ -56,6 +56,12 @@ export const PageMeta: React.FC<PageMetaProps> = ({
       ? ogImage
       : `${baseAppUrl}${ogImage.startsWith('/') ? '' : '/'}${ogImage}`
     setMetaTag('property', 'og:image', fullOgImage)
+
+    // Twitter Card metadata
+    setMetaTag('name', 'twitter:card', 'summary_large_image')
+    setMetaTag('name', 'twitter:title', fullTitle)
+    setMetaTag('name', 'twitter:description', description)
+    setMetaTag('name', 'twitter:image', fullOgImage)
 
     // 4. Canonical URL & og:url
     if (canonicalUrl) {
