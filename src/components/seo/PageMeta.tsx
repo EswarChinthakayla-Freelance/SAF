@@ -25,7 +25,7 @@ export const PageMeta: React.FC<PageMetaProps> = ({
   useEffect(() => {
     const baseAppUrl = (
       (typeof import.meta !== 'undefined' && import.meta.env?.VITE_APP_URL) ||
-      'https://srianjaneyafurnitures.com'
+      (typeof window !== 'undefined' ? window.location.origin : 'https://saftallur.vercel.app')
     ).replace(/\/$/, '')
 
     // 1. Document Title
