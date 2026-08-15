@@ -36,7 +36,7 @@ function formatDate(dateStr?: string | null): string {
  * Builds public/sitemap.xml with static public routes, active collections, and published products.
  */
 export async function generateSitemap() {
-  const baseUrl = (process.env.VITE_APP_URL || 'https://srianjaneyafurnitures.com').replace(/\/$/, '')
+  const baseUrl = (process.env.VITE_APP_URL || 'https://saftallur.vercel.app').replace(/\/$/, '')
   const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://placeholder-project.supabase.co'
   const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || 'placeholder-anon-key'
 

@@ -60,9 +60,13 @@ jobs:
         run: npm ci
 
       - name: Run Vitest Unit Tests
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
         run: npm run test:unit
 
       - name: Run Vitest Integration Tests
+        env:
+          NODE_OPTIONS: '--max-old-space-size=4096'
         run: npm run test:integration
 
   # -------------------------------------------------------------
