@@ -7,13 +7,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'happy-dom',
-    environmentOptions: {
-      happyDOM: {
-        settings: {
-          disableFetch: true,
-        },
-      },
-    },
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/{unit,integration,security}/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'node_modules/**'],

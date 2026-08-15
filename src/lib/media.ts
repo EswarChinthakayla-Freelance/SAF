@@ -18,7 +18,7 @@ export const MEDIA_PRESETS: Record<MediaPreset, MediaTransformOptions> = {
 export function getMediaUrl(
   bucket: string,
   storagePath: string | null | undefined,
-  _options?: MediaTransformOptions | MediaPreset
+  options?: MediaTransformOptions | MediaPreset
 ): string {
   if (!storagePath) {
     return '/assets/logo.svg'
@@ -29,7 +29,22 @@ export function getMediaUrl(
     return storagePath
   }
 
-  const { data } = supabase.storage.from(bucket).getPublicUrl(storagePath)
+  let transform: { width?: number; height?: number; resize?: 'cover' | 'contain' | 'fill'; quality?: number; format?: 'origin' } | undefined
+  if (options) {
+    const preset = typeof options === 'string' ? MEDIA_PRESETS[options] : options
+    if (preset) {
+      transform = {
+        width: preset.width,
+        height: preset.height,
+        resize: preset.resize,
+        quality: preset.quality,
+        format: preset.format === 'origin' ? 'origin' : undefined,
+      }
+    }
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(storagePath, transform ? { transform } : undefined)
 
   return data.publicUrl
 }
+

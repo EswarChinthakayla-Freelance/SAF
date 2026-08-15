@@ -42,10 +42,10 @@ export function useSubmitInquiry() {
         success: true,
         inquiryId: data?.inquiry_id,
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Inquiry submission error:', err)
       const errorMsg =
-        err?.message ||
+        (err instanceof Error ? err.message : null) ||
         "We couldn't send your enquiry right now. Please check your connection and try again, or contact our showroom directly."
       setServerError(errorMsg)
       return {

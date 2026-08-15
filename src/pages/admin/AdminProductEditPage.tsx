@@ -28,6 +28,7 @@ export const AdminProductEditPage: React.FC = () => {
 
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [newUploadedPaths, setNewUploadedPaths] = useState<string[]>([])
 
   // Provide loaded product name to AdminTopbar breadcrumbs
   const breadcrumbItems = useMemo<AppBreadcrumbItem[]>(
@@ -63,12 +64,12 @@ export const AdminProductEditPage: React.FC = () => {
   }
 
   // Parse dimensions from JSONB
-  const rawDims = (product.dimensions && typeof product.dimensions === 'object' ? product.dimensions : {}) as Record<string, any>
+  const rawDims = (product.dimensions && typeof product.dimensions === 'object' ? product.dimensions : {}) as Record<string, unknown>
   const parsedDimensions: { length: number; width: number; height: number; unit?: 'inches' | 'cm' | 'mm' } = {
     length: Number(rawDims.length) || 0,
     width: Number(rawDims.width) || 0,
     height: Number(rawDims.height) || 0,
-    unit: rawDims.unit || 'inches',
+    unit: (rawDims.unit as 'inches' | 'cm' | 'mm') || 'inches',
   }
 
   const initialValues: AdminProductFormValues = {
@@ -124,8 +125,6 @@ export const AdminProductEditPage: React.FC = () => {
     })),
     tagIds: (product.product_tags || []).map((pt) => pt.tag_id),
   }
-
-  const [newUploadedPaths, setNewUploadedPaths] = useState<string[]>([])
 
   const handleUploadImages = async (files: File[]): Promise<ProductImageRow[]> => {
     const uploadedImages: ProductImageRow[] = []

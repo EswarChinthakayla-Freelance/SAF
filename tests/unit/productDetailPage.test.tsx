@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ProductDetailPage } from '@/pages/public/ProductDetailPage'
 import { VariantSelector } from '@/components/features/products/VariantSelector'
 import { ProductSpecifications } from '@/components/features/products/ProductSpecifications'
-import type { ProductDetail, ProductVariantRow } from '@/types/app'
+import type { ProductDetail } from '@/types/app'
 
 // Mock useProduct and useRelatedProducts
 const mockProductDetail: ProductDetail = {

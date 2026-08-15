@@ -278,7 +278,7 @@ export const AdminProductsPage: React.FC = () => {
               }}
               value={selectedStatus}
               onValueChange={(val) => {
-                setSelectedStatus((val || 'all') as any)
+                setSelectedStatus((val || 'all') as 'all' | 'published' | 'draft')
                 setPage(1)
               }}
             >

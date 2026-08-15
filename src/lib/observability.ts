@@ -84,9 +84,15 @@ export function reportError(err: unknown, context: ErrorReportContext = {}): voi
   }
 
   // If Sentry is initialized / available in global window
-  if (typeof window !== 'undefined' && (window as any).Sentry) {
+  type WindowWithSentry = Window & {
+    Sentry?: {
+      captureException: (err: unknown, ctx?: unknown) => void
+    }
+  }
+  const win = typeof window !== 'undefined' ? (window as unknown as WindowWithSentry) : undefined
+  if (win?.Sentry) {
     try {
-      ;(window as any).Sentry.captureException(err, {
+      win.Sentry.captureException(err, {
         tags: {
           category: payload.category,
           route: payload.route,

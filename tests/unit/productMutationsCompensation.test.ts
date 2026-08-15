@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { supabase } from '@/lib/supabase'
 
 describe('Product CRUD & Storage Lifecycle Compensation Logic', () => {
   beforeEach(() => {
@@ -10,17 +9,6 @@ describe('Product CRUD & Storage Lifecycle Compensation Logic', () => {
     const mockStorageRemove = vi.fn().mockResolvedValue({ data: [], error: null })
     const mockDbDelete = vi.fn().mockReturnValue({
       eq: vi.fn().mockResolvedValue({ error: null }),
-    })
-    const mockDbSelect = vi.fn().mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({
-          data: [
-            { storage_path: 'products/photo1.webp' },
-            { storage_path: 'products/photo2.webp' },
-          ],
-          error: null,
-        }),
-      }),
     })
 
     // Simulate delete workflow order
@@ -48,8 +36,7 @@ describe('Product CRUD & Storage Lifecycle Compensation Logic', () => {
     const mockStorageRemove = vi.fn().mockResolvedValue({ data: [], error: null })
     const newlyUploaded = ['products/draft/new_1.webp', 'products/draft/new_2.webp']
 
-    let createdProductId = 'temp-prod-999'
-    let saveFailed = true
+    const saveFailed = true
 
     if (saveFailed) {
       // Execute compensation
@@ -64,7 +51,7 @@ describe('Product CRUD & Storage Lifecycle Compensation Logic', () => {
     const newStoragePath = 'products/replacement_hero.webp'
 
     const mockStorageRemove = vi.fn()
-    let dbUpdateSuccess = false
+    const dbUpdateSuccess = false
 
     if (dbUpdateSuccess) {
       await mockStorageRemove([oldStoragePath])

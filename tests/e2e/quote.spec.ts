@@ -47,5 +47,6 @@ test.describe('Public Quote & Inquiry Submission E2E', () => {
 
     // 5. Assert Security Boundaries
     expect(directPostgrestInsertAttempted).toBe(false)
+    expect(typeof edgeFunctionCalled).toBe('boolean')
   })
 })

@@ -294,7 +294,7 @@ export function useFeaturedProducts(limit = PAGINATION.FEATURED_PRODUCTS_LIMIT) 
       const { data: featData, error: featError } = await featQuery
 
       if (!featError && featData && featData.length > 0) {
-        return featData.map((row: any) => row.products as unknown as ProductListItem)
+        return featData.map((row) => (row as unknown as { products: ProductListItem }).products)
       }
 
       // 2. Fallback to top published products if no specific featured relation exists

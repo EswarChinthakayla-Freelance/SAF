@@ -30,9 +30,15 @@ export function useReducedMotionPreference(): boolean {
       if (typeof mediaQuery.addEventListener === 'function') {
         mediaQuery.addEventListener('change', handleChange)
         return () => mediaQuery.removeEventListener('change', handleChange)
-      } else if (typeof (mediaQuery as any).addListener === 'function') {
-        ;(mediaQuery as any).addListener(handleChange)
-        return () => (mediaQuery as any).removeListener(handleChange)
+      } else {
+        const legacy = mediaQuery as unknown as {
+          addListener?: (cb: (e: MediaQueryListEvent | MediaQueryList) => void) => void
+          removeListener?: (cb: (e: MediaQueryListEvent | MediaQueryList) => void) => void
+        }
+        if (typeof legacy.addListener === 'function') {
+          legacy.addListener(handleChange)
+          return () => legacy.removeListener?.(handleChange)
+        }
       }
     } catch {
       // Graceful fallback for non-compliant browser or test environments

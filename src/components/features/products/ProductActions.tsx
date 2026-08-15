@@ -59,9 +59,9 @@ export const ProductActions: React.FC<ProductActionsProps> = ({
           text: shareText,
           url: canonicalUrl,
         })
-      } catch (err: any) {
+      } catch (err: unknown) {
         // User cancellation is not a failure
-        if (err.name !== 'AbortError') {
+        if (err instanceof Error && err.name !== 'AbortError') {
           copyToClipboard(canonicalUrl)
         }
       }

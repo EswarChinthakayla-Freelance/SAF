@@ -35,7 +35,10 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
   const [isUploading, setIsUploading] = useState(false)
   const activeCountRef = useRef(0)
   const queueRef = useRef<UploadFileItem[]>([])
-  queueRef.current = queue
+
+  useEffect(() => {
+    queueRef.current = queue
+  }, [queue])
 
   // Revoke object URLs on unmount to prevent browser memory leaks
   useEffect(() => {
@@ -122,11 +125,15 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
             : it
         )
       )
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { userMessage?: string })?.userMessage ||
+        (err instanceof Error ? err.message : null) ||
+        'Upload failed'
       setQueue((prev) =>
         prev.map((it) =>
           it.id === pendingItem.id
-            ? { ...it, status: 'failed', errorMessage: err?.userMessage || err?.message || 'Upload failed' }
+            ? { ...it, status: 'failed', errorMessage: errorMsg }
             : it
         )
       )
@@ -148,8 +155,12 @@ export function useImageUpload(options: UseImageUploadOptions = {}) {
             previewUrl: URL.createObjectURL(file),
             status: 'pending',
           })
-        } catch (err: any) {
-          alert(err?.userMessage || err?.message || 'File validation failed')
+        } catch (err: unknown) {
+          const validationMsg =
+            (err as { userMessage?: string })?.userMessage ||
+            (err instanceof Error ? err.message : null) ||
+            'File validation failed'
+          alert(validationMsg)
         }
       })
 

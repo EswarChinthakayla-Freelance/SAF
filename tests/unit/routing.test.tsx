@@ -4,7 +4,6 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
 import { useAuthStore } from '@/stores/authStore'
-import { RouteErrorBoundary } from '@/components/common/RouteErrorBoundary'
 import { ScrollToTop } from '@/components/common/ScrollToTop'
 
 describe('Router & ProtectedRoute Architecture', () => {

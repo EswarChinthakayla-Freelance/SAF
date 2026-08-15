@@ -144,7 +144,7 @@ describe('AdminProductsPage Component', () => {
     const { BasicInfoSection } = await import('@/components/admin/product-form/BasicInfoSection')
     const handleChange = vi.fn()
 
-    const { rerender } = render(
+    render(
       <BasicInfoSection
         values={{
           name: '',

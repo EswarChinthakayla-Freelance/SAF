@@ -47,16 +47,17 @@ async function verifyRLS() {
       console.error('❌ Check 1 Failed: Anonymous read on published products errored:', error.message)
       failedChecks++
     } else {
-      console.log('✓ Check 1 Passed: Anonymous read on published products permitted (found', data.length, 'records)')
+      console.log('✓ Check 1 Passed: Anonymous read on published products permitted (found', (data || []).length, 'records)')
     }
-  } catch (err: any) {
-    console.error('❌ Check 1 Exception:', err.message)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('❌ Check 1 Exception:', msg)
     failedChecks++
   }
 
   // 2. Verify Anonymous Direct INSERT to Inquiries is BLOCKED
   try {
-    const { data, error } = await anonClient
+    const { error } = await anonClient
       .from('inquiries')
       .insert({
         name: 'RLS Automated Security Check',
@@ -71,8 +72,9 @@ async function verifyRLS() {
     } else {
       console.log('✓ Check 2 Passed: Anonymous direct INSERT to inquiries correctly denied by RLS policy.')
     }
-  } catch (err: any) {
-    console.log('✓ Check 2 Passed: Anonymous direct INSERT rejected with exception:', err.message)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.log('✓ Check 2 Passed: Anonymous direct INSERT rejected with exception:', msg)
   }
 
   // 3. Verify Anonymous Cannot Read Customer Inquiries
@@ -88,13 +90,14 @@ async function verifyRLS() {
     } else {
       console.log('✓ Check 3 Passed: Anonymous read on customer inquiries returned 0 records / denied.')
     }
-  } catch (err: any) {
-    console.log('✓ Check 3 Passed: Anonymous read on inquiries blocked:', err.message)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.log('✓ Check 3 Passed: Anonymous read on inquiries blocked:', msg)
   }
 
   // 4. Verify Anonymous Read on Site Settings
   try {
-    const { data, error } = await anonClient
+    const { error } = await anonClient
       .from('site_settings')
       .select('id, brand_name')
       .eq('id', 1)
@@ -106,8 +109,9 @@ async function verifyRLS() {
     } else {
       console.log('✓ Check 4 Passed: Anonymous read on site_settings permitted.')
     }
-  } catch (err: any) {
-    console.error('❌ Check 4 Exception:', err.message)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('❌ Check 4 Exception:', msg)
     failedChecks++
   }
 

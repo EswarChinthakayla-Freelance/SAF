@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { CACHE_TIMES } from '@/lib/constants'
-import { queryKeys, normalizeQueryKeyFilters } from '@/hooks/queries/queryKeys'
+import { queryKeys } from '@/hooks/queries/queryKeys'
 import { shouldRetryQuery, calculateRetryDelay } from '@/lib/queryClient'
 import { AppError } from '@/lib/errors'
 

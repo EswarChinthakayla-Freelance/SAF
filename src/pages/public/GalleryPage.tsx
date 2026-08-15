@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { PageHeader } from '@/components/common/PageHeader'
 import { PageMeta } from '@/components/seo/PageMeta'
@@ -36,7 +36,7 @@ export const GalleryPage: React.FC = () => {
   const allImages = useMemo(() => {
     if (!data?.pages) return []
     return data.pages.flatMap((page) => page.images)
-  }, [data?.pages])
+  }, [data])
 
   // Lightbox state & Focus return management
   const [selectedLightboxIndex, setSelectedLightboxIndex] = useState<number | null>(null)
@@ -73,9 +73,9 @@ export const GalleryPage: React.FC = () => {
   }
 
   // Safe fetchNextPage wrapper that avoids discriminated union narrowing
-  const handleFetchNextPage = () => {
+  const handleFetchNextPage = useCallback(() => {
     void fetchNextPage()
-  }
+  }, [fetchNextPage])
 
   // IntersectionObserver for accessible Infinite Scroll Sentinel
   useEffect(() => {
@@ -93,7 +93,7 @@ export const GalleryPage: React.FC = () => {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError])
+  }, [hasNextPage, isFetchingNextPage, isFetchNextPageError, handleFetchNextPage])
 
   const activeRoomLabel = GALLERY_ROOM_FILTERS.find((f) => f.slug === activeRoomSlug)?.label || 'All Spaces'
 

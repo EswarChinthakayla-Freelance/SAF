@@ -1,4 +1,4 @@
-import type { ProductRow, CollectionRow, ProductDetail } from '@/types/app'
+import type { CollectionRow, ProductDetail } from '@/types/app'
 
 export const sampleCollection: CollectionRow = {
   id: 'c1111111-1111-1111-1111-111111111111',

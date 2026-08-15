@@ -33,15 +33,16 @@ export const AdminImageUploader: React.FC<AdminImageUploaderProps> = ({
 
   // Clean up object URLs on component unmount to prevent browser memory leaks
   React.useEffect(() => {
+    const urls = previewUrlsRef.current
     return () => {
-      previewUrlsRef.current.forEach((url) => {
+      urls.forEach((url) => {
         try {
           URL.revokeObjectURL(url)
         } catch {
           // ignore
         }
       })
-      previewUrlsRef.current.clear()
+      urls.clear()
     }
   }, [])
 
@@ -97,12 +98,13 @@ export const AdminImageUploader: React.FC<AdminImageUploaderProps> = ({
           items.some((it) => it.id === q.id) ? { ...q, status: 'uploaded' } : q
         )
       )
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Upload failed'
       console.error('[AdminImageUploader] Upload failed:', err)
       setQueue((prev) =>
         prev.map((q) =>
           items.some((it) => it.id === q.id)
-            ? { ...q, status: 'failed', errorMessage: err?.message || 'Upload failed' }
+            ? { ...q, status: 'failed', errorMessage: errorMsg }
             : q
         )
       )

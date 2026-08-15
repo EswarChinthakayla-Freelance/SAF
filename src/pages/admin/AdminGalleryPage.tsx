@@ -22,7 +22,7 @@ import type { GalleryImageRow } from '@/types/app'
 export const AdminGalleryPage: React.FC = () => {
   const { data: galleryImages = [], isLoading, isError, error, refetch } = useAdminGallery()
   const { data: productsData } = useAdminProducts({ pageSize: 100 })
-  const { createGalleryImage, updateGalleryImage, deleteGalleryImage, toggleActive } =
+  const { createGalleryImage, updateGalleryImage, deleteGalleryImage, toggleActive, reorderGalleryImages } =
     useGalleryMutations()
 
   // Sheet / Modal Editing State
@@ -107,7 +107,7 @@ export const AdminGalleryPage: React.FC = () => {
     }))
 
     try {
-      await useGalleryMutations().reorderGalleryImages.mutateAsync(payload)
+      await reorderGalleryImages.mutateAsync(payload)
     } catch (err) {
       console.error('Failed to save gallery order:', err)
     }

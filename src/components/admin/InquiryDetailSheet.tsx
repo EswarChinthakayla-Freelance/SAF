@@ -19,14 +19,17 @@ export interface InquiryDetailSheetProps {
   onUpdateInquiry: (id: string, updates: { status?: InquiryStatus; admin_notes?: string }) => Promise<void>
 }
 
-export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = ({
+interface InquiryDetailSheetContentProps {
+  inquiry: InquiryRow
+  onClose: () => void
+  onUpdateInquiry: (id: string, updates: { status?: InquiryStatus; admin_notes?: string }) => Promise<void>
+}
+
+const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
   inquiry,
-  isOpen,
   onClose,
   onUpdateInquiry,
 }) => {
-  if (!isOpen || !inquiry) return null
-
   const [status, setStatus] = useState<InquiryStatus>(inquiry.status as InquiryStatus)
   const [adminNotes, setAdminNotes] = useState(inquiry.admin_notes || '')
   const [isSaving, setIsSaving] = useState(false)
@@ -236,3 +239,9 @@ export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = ({
     </div>
   )
 }
+
+export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = (props) => {
+  if (!props.isOpen || !props.inquiry) return null
+  return <InquiryDetailSheetContent {...props} inquiry={props.inquiry} />
+}
+

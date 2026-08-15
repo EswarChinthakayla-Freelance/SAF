@@ -28,7 +28,7 @@ Object.defineProperty(window, 'matchMedia', {
 // 2. Controllable IntersectionObserver Mock
 type IntersectionCallback = (entries: IntersectionObserverEntry[], observer: IntersectionObserver) => void
 
-let activeObserverCallbacks: Set<IntersectionCallback> = new Set()
+const activeObserverCallbacks: Set<IntersectionCallback> = new Set()
 
 export const triggerIntersection = (isIntersecting: boolean, target?: Element) => {
   const entry = {

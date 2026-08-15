@@ -45,7 +45,7 @@ export const ProductDetailPage: React.FC = () => {
     } else {
       setSelectedVariant(null)
     }
-  }, [product?.id])
+  }, [product])
 
   // Loading Skeleton State
   if (isLoading) {

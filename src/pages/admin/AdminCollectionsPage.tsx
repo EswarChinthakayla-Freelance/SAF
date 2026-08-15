@@ -133,9 +133,9 @@ export const AdminCollectionsPage: React.FC = () => {
         })
       }
       handleCloseSheet()
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save collection:', err)
-      const msg = err?.message || 'Failed to save collection record.'
+      const msg = (err instanceof Error ? err.message : null) || 'Failed to save collection record.'
       if (msg.includes('unique') || msg.includes('duplicate') || msg.includes('collections_slug_key')) {
         setSheetError('A collection with this slug already exists.')
       } else {

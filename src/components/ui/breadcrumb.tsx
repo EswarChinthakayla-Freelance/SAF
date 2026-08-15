@@ -43,7 +43,7 @@ export interface BreadcrumbLinkProps extends React.ComponentProps<"a"> {
 }
 
 function BreadcrumbLink({
-  asChild,
+  asChild: _asChild,
   render,
   className,
   children,
@@ -51,7 +51,7 @@ function BreadcrumbLink({
 }: BreadcrumbLinkProps) {
   if (render && React.isValidElement(render)) {
     const renderProps = render.props as { className?: string; children?: React.ReactNode }
-    return React.cloneElement(render as React.ReactElement<any>, {
+    return React.cloneElement(render as React.ReactElement<Record<string, unknown>>, {
       ...props,
       className: cn("transition-colors hover:text-foreground", className, renderProps?.className),
       children: renderProps?.children ?? children,

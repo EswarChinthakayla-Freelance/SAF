@@ -97,7 +97,7 @@ describe('Supabase Row-Level Security (RLS) Policy Verification', () => {
         return
       }
 
-      const { data, error } = await anonClient
+      const { error } = await anonClient
         .from('site_settings')
         .select('id, brand_name, contact_email')
         .eq('id', 1)

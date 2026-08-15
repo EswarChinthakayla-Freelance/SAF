@@ -28,7 +28,7 @@ export const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   useEffect(() => {
     const coverIdx = sortedImages.findIndex((img) => img.is_cover)
     setSelectedIndex(coverIdx >= 0 ? coverIdx : 0)
-  }, [images.length])
+  }, [sortedImages])
 
   // Scroll active thumbnail into view
   useEffect(() => {

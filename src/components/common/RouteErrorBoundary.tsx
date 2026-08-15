@@ -9,7 +9,7 @@ export const RouteErrorBoundary: React.FC = () => {
 
   React.useEffect(() => {
     if (error) {
-      reportError(error, { category: 'route' })
+      reportError(error, { category: isRouteErrorResponse(error) && error.status === 404 ? 'not_found' : 'unknown' })
     }
   }, [error])
 

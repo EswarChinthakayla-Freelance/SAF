@@ -48,7 +48,10 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     updater: AdminProductFormValues[K] | ((prev: AdminProductFormValues[K]) => AdminProductFormValues[K])
   ) => {
     setValues((prev) => {
-      const nextVal = typeof updater === 'function' ? (updater as any)(prev[key]) : updater
+      const nextVal =
+        typeof updater === 'function'
+          ? (updater as (prev: AdminProductFormValues[K]) => AdminProductFormValues[K])(prev[key])
+          : updater
       return { ...prev, [key]: nextVal }
     })
     setIsDirty(true)
@@ -90,9 +93,10 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
     try {
       await onSave(values)
       setIsDirty(false)
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to save product record.'
       console.error('Failed to save product:', err)
-      alert(err?.message || 'Failed to save product record.')
+      alert(errorMsg)
     } finally {
       setIsSaving(false)
     }
