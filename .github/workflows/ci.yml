@@ -1,0 +1,217 @@
+name: Sri Anjaneya Furnitures — CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  # -------------------------------------------------------------
+  # 1. QUALITY: Clean Install, TypeScript Validation & Linting
+  # -------------------------------------------------------------
+  quality:
+    name: Quality (Typecheck & Lint)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Locked Dependencies
+        run: npm ci
+
+      - name: TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: ESLint Code Quality
+        run: npm run lint
+
+  # -------------------------------------------------------------
+  # 2. TESTS: Vitest Unit & Integration Suites
+  # -------------------------------------------------------------
+  unit-tests:
+    name: Unit & Integration Tests
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Locked Dependencies
+        run: npm ci
+
+      - name: Run Vitest Unit Tests
+        run: npm run test:unit
+
+      - name: Run Vitest Integration Tests
+        run: npm run test:integration
+
+  # -------------------------------------------------------------
+  # 3. BUILD: Sitemap Generation & Production Vite Bundle
+  # -------------------------------------------------------------
+  build:
+    name: Production Build
+    needs: quality
+    runs-on: ubuntu-latest
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL || 'https://mock-staging.supabase.co' }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY || 'mock-anon-key' }}
+      VITE_APP_URL: 'http://localhost:5173'
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Locked Dependencies
+        run: npm ci
+
+      - name: Build Production Assets
+        run: npm run build
+
+      - name: Archive Production Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist/
+          retention-days: 7
+
+  # -------------------------------------------------------------
+  # 4. SECRET AUDIT: Scan Build Output for Server Secrets
+  # -------------------------------------------------------------
+  secret-audit:
+    name: Secret & Credential Audit
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Download Production Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist
+
+      - name: Audit Dist Bundle for Committed Server Keys
+        run: |
+          echo "Scanning production bundle for leaked private keys or service tokens..."
+          # Fail if RESEND api key or SUPABASE_SERVICE_ROLE patterns appear in bundle
+          if grep -rnE "re_[a-zA-Z0-9]{30,}" dist/; then
+            echo "::error::Found possible Resend API key in dist bundle!"
+            exit 1
+          fi
+          if grep -rnE "SUPABASE_SERVICE_ROLE_KEY" dist/; then
+            echo "::error::Found service role reference in dist bundle!"
+            exit 1
+          fi
+          echo "✓ Bundle secret audit passed: 0 server credentials discovered."
+
+  # -------------------------------------------------------------
+  # 5. RLS SECURITY VERIFICATION: Against Staging Supabase
+  # -------------------------------------------------------------
+  rls-verification:
+    name: Supabase RLS Security Verification
+    needs: quality
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository || github.event_name == 'push'
+    env:
+      VITE_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
+      ALLOW_RLS_TESTS: 'true'
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Locked Dependencies
+        run: npm ci
+
+      - name: Execute RLS Policy Verification
+        run: npm run verify:rls
+
+  # -------------------------------------------------------------
+  # 6. E2E SMOKE: Playwright Browser Tests against Preview
+  # -------------------------------------------------------------
+  e2e-smoke:
+    name: Playwright E2E Smoke Tests
+    needs: [build, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Locked Dependencies
+        run: npm ci
+
+      - name: Download Production Bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-bundle
+          path: dist
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright Smoke Tests
+        env:
+          CI: 'true'
+          PLAYWRIGHT_BASE_URL: 'http://localhost:5173'
+        run: npm run test:e2e
+
+      - name: Upload Playwright Failure Artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # -------------------------------------------------------------
+  # 7. PRODUCTION PROMOTION GATE
+  # -------------------------------------------------------------
+  promote:
+    name: Production Release Gate
+    needs: [quality, unit-tests, build, secret-audit, e2e-smoke]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+    steps:
+      - name: Confirm Release Health
+        run: |
+          echo "🎉 All quality, test, build, security, and E2E gates passed successfully."
+          echo "Release is ready for production promotion on Vercel."
