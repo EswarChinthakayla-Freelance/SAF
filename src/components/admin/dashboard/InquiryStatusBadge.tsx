@@ -15,19 +15,19 @@ export const InquiryStatusBadge: React.FC<InquiryStatusBadgeProps> = ({
   const config: Record<string, { label: string; styles: string }> = {
     new: {
       label: 'New',
-      styles: 'bg-[#C9A84C]/15 text-[#E8B84B] border-[#C9A84C]/30',
+      styles: 'bg-[#1A160E] text-[#E8B84B] border-[#C9A84C]/40',
     },
     read: {
       label: 'Read',
-      styles: 'bg-slate-800/60 text-slate-300 border-slate-700/60',
+      styles: 'bg-[#12161E] text-[#93C5FD] border-[#3B82F6]/30',
     },
     replied: {
       label: 'Replied',
-      styles: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60',
+      styles: 'bg-[#0D1510] text-[#4ADE80] border-[#22C55E]/30',
     },
     closed: {
       label: 'Closed',
-      styles: 'bg-stone-900 text-stone-400 border-stone-800',
+      styles: 'bg-[#151515] text-[#8A847A] border-[#2A2A2A]',
     },
   }
 

@@ -77,25 +77,25 @@ export const AdminInquiriesPage: React.FC = () => {
     const badges: Record<string, { label: string; className: string }> = {
       new: {
         label: 'New',
-        className: 'bg-[#C9A84C]/20 text-[#E8B84B] border-[#C9A84C]/40',
+        className: 'bg-[#1A160E] text-[#E8B84B] border-[#C9A84C]/40',
       },
       read: {
         label: 'Read',
-        className: 'bg-blue-950/60 text-blue-300 border-blue-800/60',
+        className: 'bg-[#12161E] text-[#93C5FD] border-[#3B82F6]/30',
       },
       replied: {
         label: 'Replied',
-        className: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60',
+        className: 'bg-[#0D1510] text-[#4ADE80] border-[#22C55E]/30',
       },
       closed: {
         label: 'Closed',
-        className: 'bg-stone-900 text-stone-400 border-stone-800',
+        className: 'bg-[#151515] text-[#8A847A] border-[#2A2A2A]',
       },
     }
     const badge = badges[status] || badges.new
     return (
       <span
-        className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded border font-semibold ${badge.className}`}
+        className={`text-[11px] font-sans font-medium px-2.5 py-0.5 rounded border ${badge.className}`}
       >
         {badge.label}
       </span>

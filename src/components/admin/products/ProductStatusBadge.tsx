@@ -18,8 +18,8 @@ export const ProductStatusBadge: React.FC<ProductStatusBadgeProps> = ({
   const label = isPublished ? 'Published' : 'Draft'
 
   const styles = isPublished
-    ? 'bg-emerald-950/50 text-emerald-300 border-emerald-800/50 hover:bg-emerald-900/50'
-    : 'bg-[#181818] text-[#9B958B] border-[#2A2A2A] hover:text-[#F5F0E8] hover:bg-[#202020]'
+    ? 'bg-[#0D1510] text-[#4ADE80] border-[#22C55E]/40 hover:bg-[#122018] hover:border-[#22C55E]/60 shadow-sm'
+    : 'bg-[#141414] text-[#A8A29E] border-[#2E2E2E] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] hover:border-[#3E3E3E] shadow-sm'
 
   if (interactive && onToggle) {
     return (
@@ -32,11 +32,11 @@ export const ProductStatusBadge: React.FC<ProductStatusBadgeProps> = ({
         disabled={isPending}
         title={`Click to ${isPublished ? 'unpublish' : 'publish'} product`}
         aria-label={`Status: ${label}. Click to ${isPublished ? 'unpublish' : 'publish'}`}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-sans font-medium border transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${styles} ${className}`}
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-sans font-medium border transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${styles} ${className}`}
       >
         <span
           className={`w-1.5 h-1.5 rounded-full ${
-            isPublished ? 'bg-emerald-400' : 'bg-[#7A746B]'
+            isPublished ? 'bg-[#22C55E]' : 'bg-[#78716C]'
           } ${isPending ? 'animate-ping' : ''}`}
           aria-hidden="true"
         />
@@ -47,10 +47,10 @@ export const ProductStatusBadge: React.FC<ProductStatusBadgeProps> = ({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-sans font-medium border ${styles} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-sans font-medium border ${styles} ${className}`}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full ${isPublished ? 'bg-emerald-400' : 'bg-[#7A746B]'}`}
+        className={`w-1.5 h-1.5 rounded-full ${isPublished ? 'bg-[#22C55E]' : 'bg-[#78716C]'}`}
         aria-hidden="true"
       />
       <span>{label}</span>
