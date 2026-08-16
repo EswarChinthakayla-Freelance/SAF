@@ -55,33 +55,36 @@ export const AdminProductPreviewHeader: React.FC<AdminProductPreviewHeaderProps>
   }
 
   return (
-    <header className="space-y-4">
+    <header className="space-y-3 sm:space-y-4">
       {/* Top Navigation & Breadcrumb Bar */}
-      <div className="flex items-center justify-between gap-4">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-sans text-[#7A746B]">
+      <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-1.5 sm:gap-2 text-xs font-sans text-[#7A746B] min-w-0 flex-1 overflow-hidden"
+        >
           <Link
             to="/admin/products"
-            className="inline-flex items-center gap-1.5 text-[#9B958B] hover:text-[#C9A84C] transition-colors py-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#C9A84C]"
+            className="inline-flex items-center gap-1.5 text-[#9B958B] hover:text-[#C9A84C] transition-colors py-1 shrink-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-[#C9A84C]"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} className="w-3.5 h-3.5" />
             <span>Products</span>
           </Link>
-          <span className="text-[#4A4A4A]">/</span>
-          <span className="text-[#F5F0E8] font-medium truncate max-w-[200px] sm:max-w-md">
+          <span className="text-[#4A4A4A] shrink-0">/</span>
+          <span className="text-[#F5F0E8] font-medium truncate min-w-0">
             {product.name}
           </span>
         </nav>
 
-        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono tracking-widest uppercase bg-[#181818] border border-[#2E2E2E] text-[#C9A84C]">
+        <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono tracking-widest uppercase bg-[#181818] border border-[#2E2E2E] text-[#C9A84C] shrink-0 whitespace-nowrap">
           Product Inspector
         </span>
       </div>
 
       {/* Main Title & Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-        <div className="space-y-1.5 min-w-0">
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-serif text-[#F5F0E8] font-normal tracking-tight truncate">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pt-1">
+        <div className="space-y-1.5 min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-sans font-semibold text-[#F5F0E8] tracking-tight break-words">
               {product.name}
             </h1>
             <ProductStatusBadge
@@ -91,7 +94,7 @@ export const AdminProductPreviewHeader: React.FC<AdminProductPreviewHeaderProps>
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs text-[#9B958B]">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-xs text-[#9B958B]">
             {product.product_code && (
               <div className="inline-flex items-center gap-1.5 bg-[#141414] border border-[#262626] px-2 py-0.5 rounded font-mono text-[11px] text-[#D1CCC2]">
                 <span>{product.product_code}</span>
@@ -122,7 +125,7 @@ export const AdminProductPreviewHeader: React.FC<AdminProductPreviewHeaderProps>
         </div>
 
         {/* Header Action Buttons */}
-        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 pt-1 sm:pt-0">
           {/* View on Public Website (Only if Published) */}
           {product.is_published && (
             <a
