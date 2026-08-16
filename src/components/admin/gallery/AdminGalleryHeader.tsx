@@ -79,10 +79,10 @@ export const AdminGalleryHeader: React.FC<AdminGalleryHeaderProps> = ({
             type="button"
             size="sm"
             onClick={onOpenUpload}
+            icon={<HugeiconsIcon icon={ImageAdd01Icon} className="w-3.5 h-3.5" />}
             className="h-9 px-3.5 text-xs uppercase tracking-wider font-semibold"
           >
-            <HugeiconsIcon icon={ImageAdd01Icon} className="w-3.5 h-3.5 mr-1.5" />
-            <span>Upload Images</span>
+            Upload Images
           </GoldButton>
         </div>
       </div>

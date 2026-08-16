@@ -110,10 +110,10 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
           type="button"
           size="sm"
           onClick={onEditMetadata}
+          icon={<HugeiconsIcon icon={Edit02Icon} className="w-3.5 h-3.5" />}
           className="h-9 px-3.5 text-xs uppercase tracking-wider font-semibold"
         >
-          <HugeiconsIcon icon={Edit02Icon} className="w-3.5 h-3.5 mr-1.5" />
-          <span>Edit Metadata</span>
+          Edit Metadata
         </GoldButton>
 
         {/* More Actions Dropdown */}

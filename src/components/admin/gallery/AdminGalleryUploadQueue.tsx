@@ -254,11 +254,10 @@ export const AdminGalleryUploadQueue: React.FC<AdminGalleryUploadQueueProps> = (
               handleFilesAdded(e.dataTransfer.files)
             }}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center transition-all cursor-pointer ${
-              isDragging
+            className={`border-2 border-dashed rounded-none p-6 sm:p-8 text-center transition-all cursor-pointer ${isDragging
                 ? 'border-[#C9A84C] bg-[#C9A84C]/10'
                 : 'border-[#2E2E2E] hover:border-[#444444] bg-[#0E0E0E]'
-            }`}
+              }`}
           >
             <input
               type="file"
@@ -302,7 +301,7 @@ export const AdminGalleryUploadQueue: React.FC<AdminGalleryUploadQueueProps> = (
                   return (
                     <div
                       key={item.id}
-                      className="bg-[#141414] border border-[#242424] rounded-lg p-3.5 space-y-3"
+                      className="bg-[#141414] border border-[#242424] rounded-none p-3.5 space-y-3"
                     >
                       <div className="flex items-start gap-3">
                         {/* Thumbnail Preview */}
@@ -475,10 +474,10 @@ export const AdminGalleryUploadQueue: React.FC<AdminGalleryUploadQueueProps> = (
               onClick={handleStartUpload}
               loading={isProcessing}
               loadingText="Uploading batch..."
+              icon={<HugeiconsIcon icon={Upload04Icon} className="w-3.5 h-3.5" />}
               className="px-5 text-xs font-semibold uppercase tracking-wider"
             >
-              <HugeiconsIcon icon={Upload04Icon} className="w-3.5 h-3.5 mr-1.5" />
-              <span>Upload {pendingCount} {pendingCount === 1 ? 'Image' : 'Images'}</span>
+              Upload {pendingCount} {pendingCount === 1 ? 'Image' : 'Images'}
             </GoldButton>
           )}
         </div>

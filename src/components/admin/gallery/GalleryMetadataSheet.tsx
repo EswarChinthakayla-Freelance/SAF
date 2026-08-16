@@ -137,7 +137,7 @@ export const GalleryMetadataSheet: React.FC<GalleryMetadataSheetProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 flex flex-col justify-between overflow-hidden">
           <div className="flex-1 p-6 space-y-5 overflow-y-auto">
             {/* Live Context Banner */}
-            <div className="flex items-center gap-3 p-3 bg-[#161616] border border-[#262626] rounded-lg">
+            <div className="flex items-center gap-3 p-3 bg-[#161616] border border-[#262626] rounded-none">
               <div className="relative w-16 h-16 rounded bg-[#0A0A0A] overflow-hidden shrink-0 border border-[#2A2A2A]">
                 <img src={thumbUrl} alt="Preview thumbnail" className="w-full h-full object-cover" />
               </div>
@@ -167,7 +167,7 @@ export const GalleryMetadataSheet: React.FC<GalleryMetadataSheetProps> = ({
                   setIsDirty(true)
                 }}
                 placeholder="Describe the image for visitors using assistive technology (e.g. Teak wood architectural four-poster bed in sunlit master suite)"
-                className="w-full p-3 bg-[#0A0A0A] border border-[#282828] rounded-md text-xs font-sans text-[#F5F0E8] placeholder:text-[#666158] focus:border-[#C9A84C] focus:outline-none transition-colors resize-none leading-relaxed"
+                className="w-full p-3 bg-[#0A0A0A] border border-[#282828] rounded-none text-xs font-sans text-[#F5F0E8] placeholder:text-[#666158] focus:border-[#C9A84C] focus:outline-none transition-colors resize-none leading-relaxed"
               />
               <p className="text-[11px] text-[#7A746B]">
                 Used for public accessibility, screen readers, and showroom keyword discovery.
@@ -268,7 +268,7 @@ export const GalleryMetadataSheet: React.FC<GalleryMetadataSheetProps> = ({
                   })
                   setIsDirty(true)
                 }}
-                className="w-full h-10 px-3 bg-[#0A0A0A] border border-[#282828] rounded-md text-xs font-mono text-[#F5F0E8] focus:border-[#C9A84C] focus:outline-none"
+                className="w-full h-10 px-3 bg-[#0A0A0A] border border-[#282828] rounded-none text-xs font-mono text-[#F5F0E8] focus:border-[#C9A84C] focus:outline-none"
               />
               <p className="text-[11px] text-[#7A746B]">
                 Lower numeric values appear earlier in the public gallery sequence.
@@ -276,7 +276,7 @@ export const GalleryMetadataSheet: React.FC<GalleryMetadataSheetProps> = ({
             </div>
 
             {/* Visibility Toggle */}
-            <div className="flex items-center justify-between p-4 bg-[#161616] border border-[#262626] rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[#161616] border border-[#262626] rounded-none">
               <div className="space-y-0.5">
                 <div className="text-xs font-medium text-[#F5F0E8] flex items-center gap-1.5">
                   <HugeiconsIcon icon={ViewIcon} className="w-3.5 h-3.5 text-[#4ADE80]" />
@@ -316,10 +316,10 @@ export const GalleryMetadataSheet: React.FC<GalleryMetadataSheetProps> = ({
               size="sm"
               loading={isSaving}
               loadingText="Saving Metadata..."
+              icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-3.5 h-3.5" />}
               className="px-5 text-xs font-semibold uppercase tracking-wider"
             >
-              <HugeiconsIcon icon={CheckmarkCircle02Icon} className="w-3.5 h-3.5 mr-1.5" />
-              <span>Save Metadata</span>
+              Save Metadata
             </GoldButton>
           </div>
         </form>
