@@ -53,8 +53,8 @@ export function useSubmitInquiry() {
         console.warn('Edge Function submit-inquiry unavailable, attempting direct database fallback:', edgeFnErr)
       }
 
-      // 2. Direct Database Fallback Path
-      const { data: dbData, error: dbError } = await supabase
+      // 2. Direct Database Fallback Path (Does not request .select() so anonymous visitors without SELECT permission can insert safely)
+      const { error: dbError } = await supabase
         .from('inquiries')
         .insert({
           name: values.name.trim(),
@@ -66,8 +66,6 @@ export function useSubmitInquiry() {
           status: 'new',
           source: 'website',
         })
-        .select('id')
-        .single()
 
       if (dbError) {
         throw dbError
@@ -75,7 +73,6 @@ export function useSubmitInquiry() {
 
       return {
         success: true,
-        inquiryId: dbData?.id,
       }
     } catch (err: unknown) {
       console.error('Inquiry submission error:', err)

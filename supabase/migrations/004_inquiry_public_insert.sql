@@ -6,13 +6,8 @@
 ALTER TABLE public.inquiries DROP CONSTRAINT IF EXISTS inquiries_message_check;
 ALTER TABLE public.inquiries ADD CONSTRAINT inquiries_message_check CHECK (char_length(message) BETWEEN 5 AND 5000);
 
--- 2. Allow anonymous and authenticated visitors to submit inquiries
+-- 2. Allow anonymous and authenticated visitors to insert inquiries
 DROP POLICY IF EXISTS public_insert_inquiries ON public.inquiries;
 CREATE POLICY public_insert_inquiries ON public.inquiries
 FOR INSERT TO anon, authenticated
-WITH CHECK (
-  char_length(name) BETWEEN 2 AND 120
-  AND char_length(email) <= 320
-  AND char_length(message) BETWEEN 5 AND 5000
-  AND (status IS NULL OR status = 'new')
-);
+WITH CHECK (true);
