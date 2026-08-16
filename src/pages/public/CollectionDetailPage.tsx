@@ -220,7 +220,7 @@ export const CollectionDetailPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 shrink-0">
-            <Link to="/contact">
+            <Link to={`/contact?collection=${encodeURIComponent(collection.name)}`}>
               <GoldButton size="lg" className="text-xs uppercase font-mono tracking-wider">
                 Request Custom Quote
               </GoldButton>

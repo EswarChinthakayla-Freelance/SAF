@@ -50,12 +50,17 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
     },
   })
 
-  // Watch subject prop updates when intent changes
+  // Watch subject, productName, and productId prop updates
   React.useEffect(() => {
     if (defaultSubject) {
       setValue('subject', defaultSubject, { shouldDirty: false })
+    } else if (productName) {
+      setValue('subject', `Quote Request: ${productName}`, { shouldDirty: false })
     }
-  }, [defaultSubject, setValue])
+    if (productId) {
+      setValue('productId', productId, { shouldDirty: false })
+    }
+  }, [defaultSubject, productName, productId, setValue])
 
   const messageValue = watch('message') || ''
   const messageLength = messageValue.length
@@ -200,7 +205,7 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
           </span>
         </div>
 
-        {/* Product Context Strip (If prefilled from product view) */}
+        {/* Product / Collection Context Strip (If prefilled from product or collection view) */}
         {productName && (
           <div className="p-4 bg-[#141410] border border-[#C9A84C]/40 flex items-center justify-between gap-4">
             <div className="space-y-0.5">
@@ -216,11 +221,11 @@ export const InquiryForm: React.FC<InquiryFormProps> = ({
               <button
                 type="button"
                 onClick={onRemoveProductContext}
-                className="inline-flex items-center gap-1 text-[11px] font-mono text-[#8A847A] hover:text-[#F5F0E8] transition-colors"
-                aria-label="Remove product context"
+                className="inline-flex items-center gap-1 text-[11px] font-mono text-[#8A847A] hover:text-[#F5F0E8] transition-colors cursor-pointer"
+                aria-label="Remove item context"
               >
                 <HugeiconsIcon icon={Cancel01Icon} className="w-3.5 h-3.5" />
-                <span>Clear Piece</span>
+                <span>Clear Selection</span>
               </button>
             )}
           </div>

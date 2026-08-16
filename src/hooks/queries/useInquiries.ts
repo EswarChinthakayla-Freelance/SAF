@@ -12,7 +12,10 @@ export const INQUIRY_LIST_PROJECTION = `
   phone,
   product_id,
   subject,
+  message,
   status,
+  source,
+  admin_notes,
   created_at,
   updated_at
 `

@@ -36,6 +36,12 @@ vi.mock('@/hooks/queries/useInquiries', () => ({
     error: null,
     refetch: vi.fn(),
   }),
+  useInquiryDetail: (id?: string) => ({
+    data: id === 'inq-101' ? mockInquiries[0] : null,
+    isLoading: false,
+    isError: false,
+    error: null,
+  }),
 }))
 
 const mockUpdateInquiry = vi.fn()

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Select,
   SelectContent,
@@ -10,6 +10,7 @@ import {
 import { formatDate, formatRelativeTime } from '@/utils/dates'
 import { GoldButton } from '@/components/brand/GoldButton'
 import { INQUIRY_STATUSES, type InquiryStatus } from '@/lib/constants'
+import { useInquiryDetail } from '@/hooks/queries/useInquiries'
 import type { InquiryRow } from '@/types/app'
 
 export interface InquiryDetailSheetProps {
@@ -30,9 +31,19 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
   onClose,
   onUpdateInquiry,
 }) => {
+  const { data: detailData } = useInquiryDetail(inquiry.id)
+  const fullInquiry = detailData || inquiry
+
   const [status, setStatus] = useState<InquiryStatus>(inquiry.status as InquiryStatus)
   const [adminNotes, setAdminNotes] = useState(inquiry.admin_notes || '')
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    if (detailData) {
+      if (detailData.status) setStatus(detailData.status as InquiryStatus)
+      if (detailData.admin_notes !== undefined) setAdminNotes(detailData.admin_notes || '')
+    }
+  }, [detailData])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -59,6 +70,8 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
     return badgeColors[st] || badgeColors.new
   }
 
+  const displayMessage = fullInquiry.message || inquiry.message || ''
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       {/* Backdrop */}
@@ -74,18 +87,18 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
           <div className="space-y-1 min-w-0 pr-4">
             <div className="flex items-center gap-2.5">
               <h2 className="text-base font-serif font-semibold text-[#F5F0E8] truncate">
-                {inquiry.name}
+                {fullInquiry.name}
               </h2>
               <span
                 className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded border font-semibold ${getStatusBadge(
-                  inquiry.status
+                  status
                 )}`}
               >
-                {inquiry.status}
+                {status}
               </span>
             </div>
             <p className="text-[11px] text-[#7A746B] font-mono">
-              Received {formatDate(inquiry.created_at)} ({formatRelativeTime(inquiry.created_at)})
+              Received {formatDate(fullInquiry.created_at)} ({formatRelativeTime(fullInquiry.created_at)})
             </p>
           </div>
 
@@ -110,41 +123,53 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
               <div>
                 <span className="text-[#9B958B] block text-[11px]">Email</span>
                 <a
-                  href={`mailto:${inquiry.email}`}
+                  href={`mailto:${fullInquiry.email}`}
                   className="hover:text-[#C9A84C] font-medium break-all"
                 >
-                  {inquiry.email}
+                  {fullInquiry.email}
                 </a>
               </div>
-              {inquiry.phone && (
-                <div>
-                  <span className="text-[#9B958B] block text-[11px]">Phone</span>
-                  <a
-                    href={`tel:${inquiry.phone}`}
-                    className="hover:text-[#C9A84C] font-medium"
-                  >
-                    {inquiry.phone}
-                  </a>
-                </div>
-              )}
+              <div>
+                <span className="text-[#9B958B] block text-[11px]">Phone / WhatsApp</span>
+                {fullInquiry.phone ? (
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <a
+                      href={`tel:${fullInquiry.phone}`}
+                      className="hover:text-[#C9A84C] font-medium font-mono"
+                    >
+                      {fullInquiry.phone}
+                    </a>
+                    <a
+                      href={`https://wa.me/${fullInquiry.phone.replace(/[^0-9]/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 underline"
+                    >
+                      WhatsApp &rarr;
+                    </a>
+                  </div>
+                ) : (
+                  <span className="text-[#666158] font-mono text-[11px]">Not provided</span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Subject & Product Interest */}
-          {(inquiry.subject || inquiry.product_id) && (
-            <div className="space-y-1.5">
-              <div className="text-[10px] uppercase font-mono text-[#7A746B] font-semibold">
+          {/* Subject & Context */}
+          {(fullInquiry.subject || fullInquiry.product_id) && (
+            <div className="space-y-1.5 bg-[#141410] border border-[#C9A84C]/30 p-4">
+              <div className="text-[10px] uppercase font-mono text-[#C9A84C] font-semibold tracking-wider">
                 Context & Product Interest
               </div>
-              {inquiry.subject && (
+              {fullInquiry.subject && (
                 <p className="text-sm font-serif font-medium text-[#F5F0E8]">
-                  {inquiry.subject}
+                  {fullInquiry.subject}
                 </p>
               )}
-              {inquiry.product_id && (
+              {fullInquiry.product_id && (
                 <div className="pt-1">
                   <a
-                    href={`/admin/products/${inquiry.product_id}`}
+                    href={`/admin/products/${fullInquiry.product_id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs text-[#C9A84C] hover:text-[#E8B84B] font-mono font-medium underline"
@@ -157,9 +182,9 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
           )}
 
           {/* Historical Reply Timestamp */}
-          {inquiry.replied_at && (
+          {fullInquiry.replied_at && (
             <div className="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-none text-emerald-300 text-[11px] font-mono flex items-center gap-2">
-              <span>✓ Replied on {formatDate(inquiry.replied_at)}</span>
+              <span>✓ Replied on {formatDate(fullInquiry.replied_at)}</span>
             </div>
           )}
 
@@ -168,8 +193,14 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
             <div className="text-[10px] uppercase font-mono text-[#7A746B] font-semibold">
               Customer Message
             </div>
-            <div className="bg-[#171717] border border-[#2A2A2A] rounded-none p-4 text-[#F5F0E8] text-xs leading-relaxed whitespace-pre-wrap font-sans max-h-60 overflow-y-auto">
-              {inquiry.message}
+            <div className="bg-[#171717] border border-[#2A2A2A] rounded-none p-4 text-[#F5F0E8] text-xs leading-relaxed whitespace-pre-wrap font-sans max-h-64 overflow-y-auto">
+              {displayMessage ? (
+                displayMessage
+              ) : (
+                <span className="text-[#666158] italic font-mono text-[11px]">
+                  No message body recorded.
+                </span>
+              )}
             </div>
           </div>
 
@@ -211,26 +242,26 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
                 onChange={(e) => setAdminNotes(e.target.value)}
                 placeholder="Log internal notes, quotes given, phone consultation records..."
                 rows={4}
-                className="w-full bg-[#171717] border border-[#2A2A2A] rounded-none p-3 text-xs text-[#F5F0E8] placeholder-[#7A746B] focus:border-[#C9A84C] outline-none resize-none leading-relaxed"
+                className="w-full bg-[#171717] border border-[#2A2A2A] rounded-none p-3 text-xs text-[#F5F0E8] placeholder-[#7A746B] focus:border-[#C9A84C] outline-none resize-none leading-relaxed font-sans"
               />
             </div>
           </div>
         </div>
 
         {/* Footer Action Bar */}
-        <div className="p-5 border-t border-[#2A2A2A] bg-[#141414] flex items-center justify-end gap-3">
+        <div className="px-6 py-4 border-t border-[#2A2A2A] bg-[#141414] flex items-center justify-end gap-3">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs text-[#9B958B] hover:text-[#F5F0E8] rounded-none border border-[#2A2A2A] cursor-pointer"
+            className="px-4 py-2 text-xs font-mono text-[#9B958B] hover:text-[#F5F0E8] transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <GoldButton
-            size="sm"
             onClick={handleSave}
             loading={isSaving}
-            loadingText="Saving..."
+            size="sm"
+            className="text-xs uppercase font-mono tracking-wider font-semibold"
           >
             Update Inquiry
           </GoldButton>
@@ -240,8 +271,22 @@ const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
   )
 }
 
-export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = (props) => {
-  if (!props.isOpen || !props.inquiry) return null
-  return <InquiryDetailSheetContent {...props} inquiry={props.inquiry} />
+export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = ({
+  inquiry,
+  isOpen,
+  onClose,
+  onUpdateInquiry,
+}) => {
+  if (!isOpen || !inquiry) return null
+
+  return (
+    <InquiryDetailSheetContent
+      key={inquiry.id}
+      inquiry={inquiry}
+      onClose={onClose}
+      onUpdateInquiry={onUpdateInquiry}
+    />
+  )
 }
 
+export default InquiryDetailSheet

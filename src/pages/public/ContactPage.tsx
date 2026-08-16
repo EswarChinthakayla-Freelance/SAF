@@ -24,14 +24,31 @@ import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
  */
 export const ContactPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const productParam = searchParams.get('product') || undefined
+  const productParam = searchParams.get('product') || searchParams.get('piece') || undefined
+  const productIdParam = searchParams.get('productId') || searchParams.get('product_id') || undefined
+  const collectionParam = searchParams.get('collection') || undefined
+  const subjectParam = searchParams.get('subject') || undefined
+
+  const itemContextName = productParam
+    ? productParam.replace(/-/g, ' ')
+    : collectionParam
+      ? `${collectionParam.replace(/-/g, ' ')} Collection`
+      : undefined
+
+  const initialSubject = subjectParam
+    ? subjectParam
+    : productParam
+      ? `Quote Request: ${productParam.replace(/-/g, ' ')}`
+      : collectionParam
+        ? `Collection Consultation: ${collectionParam.replace(/-/g, ' ')} Suite`
+        : undefined
 
   const { data: settings, isLoading: isSettingsLoading } = useSiteSettings()
   const [submittedInquiryId, setSubmittedInquiryId] = useState<string | null>(null)
-  const [selectedIntent, setSelectedIntent] = useState<ConsultationIntent>(productParam ? 'product' : 'custom')
-  const [customSubject, setCustomSubject] = useState<string | undefined>(
-    productParam ? `Quote Request: ${productParam.replace(/-/g, ' ')}` : undefined
+  const [selectedIntent, setSelectedIntent] = useState<ConsultationIntent>(
+    productParam ? 'product' : collectionParam ? 'custom' : 'custom'
   )
+  const [customSubject, setCustomSubject] = useState<string | undefined>(initialSubject)
   const [mapError, setMapError] = useState(false)
 
   const address = settings?.address
@@ -51,7 +68,7 @@ export const ContactPage: React.FC = () => {
 
   const handleSelectIntent = (intent: ConsultationIntentOption) => {
     setSelectedIntent(intent.id)
-    if (!productParam) {
+    if (!itemContextName) {
       setCustomSubject(intent.defaultSubject)
     }
     handleScrollToForm()
@@ -60,6 +77,11 @@ export const ContactPage: React.FC = () => {
   const handleRemoveProductContext = () => {
     const next = new URLSearchParams(searchParams)
     next.delete('product')
+    next.delete('piece')
+    next.delete('productId')
+    next.delete('product_id')
+    next.delete('collection')
+    next.delete('subject')
     setSearchParams(next)
     setCustomSubject(undefined)
   }
@@ -94,7 +116,11 @@ export const ContactPage: React.FC = () => {
                 STEP 02 // DESIGN BRIEF
               </span>
               <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#F5F0E8] tracking-tight leading-tight">
-                {productParam ? 'Request a Piece Quote' : 'Let’s Shape Your Space'}
+                {productParam
+                  ? 'Request a Piece Quote'
+                  : collectionParam
+                    ? 'Collection Consultation'
+                    : 'Let’s Shape Your Space'}
               </h2>
             </div>
 
@@ -132,9 +158,10 @@ export const ContactPage: React.FC = () => {
               />
             ) : (
               <InquiryForm
-                productName={productParam ? productParam.replace(/-/g, ' ') : undefined}
-                defaultSubject={customSubject}
-                onRemoveProductContext={productParam ? handleRemoveProductContext : undefined}
+                productId={productIdParam}
+                productName={itemContextName}
+                defaultSubject={customSubject || initialSubject}
+                onRemoveProductContext={itemContextName ? handleRemoveProductContext : undefined}
                 onSuccess={(id) => setSubmittedInquiryId(id || 'submitted')}
               />
             )}
