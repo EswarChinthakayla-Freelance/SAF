@@ -135,10 +135,32 @@ export function useCollectionMutations() {
     retry: false,
   })
 
+  const reorderCollections = useMutation({
+    mutationFn: async (items: { id: string; sort_order: number }[]) => {
+      const updates = items.map((item) =>
+        supabase
+          .from('collections')
+          .update({ sort_order: item.sort_order })
+          .eq('id', item.id)
+      )
+      const results = await Promise.all(updates)
+      for (const res of results) {
+        if (res.error) throw normalizeError(res.error)
+      }
+      return items
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.collections.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
+    },
+    retry: false,
+  })
+
   return {
     createCollection,
     updateCollection,
     deleteCollection,
     toggleActive,
+    reorderCollections,
   }
 }

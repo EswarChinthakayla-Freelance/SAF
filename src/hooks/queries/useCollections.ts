@@ -3,10 +3,16 @@ import { supabase } from '@/lib/supabase'
 import { queryKeys } from './queryKeys'
 import { CACHE_TIMES } from '@/lib/constants'
 import { normalizeError } from '@/lib/errors'
-import type { CollectionRow } from '@/types/app'
+import type { CollectionRow, AdminCollectionItem } from '@/types/app'
 
 export interface UseCollectionsOptions {
   activeOnly?: boolean
+  [key: string]: unknown
+}
+
+export interface UseAdminCollectionsOptions {
+  searchQuery?: string
+  visibility?: 'all' | 'active' | 'inactive'
   [key: string]: unknown
 }
 
@@ -79,16 +85,29 @@ export function useCollection(slug?: string) {
 }
 
 /**
- * Admin collections management query.
+ * Admin collections management query with efficient product count aggregation.
  */
-export function useAdminCollections() {
-  return useQuery<CollectionRow[], Error>({
-    queryKey: queryKeys.collections.adminList(),
+export function useAdminCollections(options: UseAdminCollectionsOptions = {}) {
+  return useQuery<AdminCollectionItem[], Error>({
+    queryKey: queryKeys.collections.adminList(options),
     queryFn: async ({ signal }) => {
       let query = supabase
         .from('collections')
-        .select(COLLECTION_LIST_PROJECTION)
+        .select(
+          'id, name, slug, description, cover_image_path, cover_image_alt, sort_order, is_active, created_at, updated_at, products(count)'
+        )
         .order('sort_order', { ascending: true })
+
+      if (options.visibility === 'active') {
+        query = query.eq('is_active', true)
+      } else if (options.visibility === 'inactive') {
+        query = query.eq('is_active', false)
+      }
+
+      if (options.searchQuery && options.searchQuery.trim().length > 0) {
+        const term = `%${options.searchQuery.trim()}%`
+        query = query.or(`name.ilike.${term},slug.ilike.${term}`)
+      }
 
       if (signal) {
         query = query.abortSignal(signal)
@@ -100,7 +119,25 @@ export function useAdminCollections() {
         throw normalizeError(error)
       }
 
-      return (data as CollectionRow[]) || []
+      interface RawCollectionQueryRow extends CollectionRow {
+        products?: { count: number }[] | { count: number } | null
+      }
+
+      return ((data as unknown as RawCollectionQueryRow[]) || []).map((row) => ({
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        description: row.description,
+        cover_image_path: row.cover_image_path,
+        cover_image_alt: row.cover_image_alt,
+        sort_order: row.sort_order,
+        is_active: row.is_active,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        product_count: Array.isArray(row.products)
+          ? row.products[0]?.count ?? 0
+          : row.products?.count ?? 0,
+      }))
     },
     staleTime: CACHE_TIMES.ADMIN_STALE_MS,
   })

@@ -16,6 +16,10 @@ export type CollectionRow = Database['public']['Tables']['collections']['Row']
 export type CollectionInsert = Database['public']['Tables']['collections']['Insert']
 export type CollectionUpdate = Database['public']['Tables']['collections']['Update']
 
+export interface AdminCollectionItem extends CollectionRow {
+  product_count?: number
+}
+
 export type TagRow = Database['public']['Tables']['tags']['Row']
 export type TagInsert = Database['public']['Tables']['tags']['Insert']
 

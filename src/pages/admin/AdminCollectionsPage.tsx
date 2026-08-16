@@ -1,72 +1,181 @@
-import React, { useState } from 'react'
-import { PageHeader } from '@/components/common/PageHeader'
-import { AdminDataTable, type Column } from '@/components/admin/AdminDataTable'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import {
+  AdminCollectionsToolbar,
+  type ViewMode,
+} from '@/components/admin/collections/AdminCollectionsToolbar'
+import { AdminCollectionsTable } from '@/components/admin/collections/AdminCollectionsTable'
+import { AdminCollectionBoard } from '@/components/admin/collections/AdminCollectionBoard'
+import { AdminCollectionSheet } from '@/components/admin/collections/AdminCollectionSheet'
+import { AdminCollectionReorderBar } from '@/components/admin/collections/AdminCollectionReorderBar'
+import { CollectionDeactivateDialog } from '@/components/admin/collections/CollectionDeactivateDialog'
 import { ConfirmDeleteDialog } from '@/components/common/ConfirmDeleteDialog'
-import { AdminImageUploader } from '@/components/admin/AdminImageUploader'
 import { GoldButton } from '@/components/brand/GoldButton'
-import { useCollections } from '@/hooks/queries/useCollections'
+import { useAdminCollections } from '@/hooks/queries/useCollections'
 import { useCollectionMutations } from '@/hooks/mutations/useCollectionMutations'
-import { getMediaUrl } from '@/lib/media'
-import { formatDate } from '@/utils/dates'
-import { supabase } from '@/lib/supabase'
-import type { CollectionRow } from '@/types/app'
+import { SEARCH_CONSTRAINTS } from '@/lib/constants'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  PlusSignIcon,
+  Layers01Icon,
+  Search01Icon,
+  RefreshIcon,
+} from '@hugeicons/core-free-icons'
+import type {
+  AdminCollectionItem,
+  CollectionInsert,
+  CollectionUpdate,
+} from '@/types/app'
 
+const STORAGE_VIEW_KEY = 'admin-collections-view'
+
+/**
+ * AdminCollectionsPage — "The Collection Studio"
+ * Visual collection management with List/Board switcher, cover previews,
+ * curated display ordering, safe publication control, and responsive slide-over editing.
+ */
 export const AdminCollectionsPage: React.FC = () => {
-  const { data: collections = [], isLoading, isError, error, refetch } = useCollections({
-    activeOnly: false,
-  })
-  const { createCollection, updateCollection, deleteCollection, toggleActive } =
-    useCollectionMutations()
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Sheet State (Add / Edit)
+  // 1. View Mode Persistence (Local storage only, excluded from server query)
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_VIEW_KEY)
+      if (saved === 'board' || saved === 'list') return saved
+    } catch {
+      // Fallback
+    }
+    return 'list'
+  })
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode)
+    try {
+      localStorage.setItem(STORAGE_VIEW_KEY, mode)
+    } catch {
+      // Ignore
+    }
+  }, [])
+
+  // 2. Search & Visibility Filters
+  const initialQuery = searchParams.get('q') || ''
+  const initialVisibility = (searchParams.get('visibility') || 'all') as
+    | 'all'
+    | 'active'
+    | 'inactive'
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery)
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery)
+  const [selectedVisibility, setSelectedVisibility] =
+    useState<'all' | 'active' | 'inactive'>(initialVisibility)
+
+  // Debounce search input (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim())
+    }, SEARCH_CONSTRAINTS.DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  // Sync state to URL params cleanly
+  useEffect(() => {
+    const nextParams = new URLSearchParams()
+    if (debouncedSearch) nextParams.set('q', debouncedSearch)
+    if (selectedVisibility !== 'all') nextParams.set('visibility', selectedVisibility)
+    setSearchParams(nextParams, { replace: true })
+  }, [debouncedSearch, selectedVisibility, setSearchParams])
+
+  // 3. Server Query & Mutations
+  const {
+    data: rawCollections = [],
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    refetch,
+  } = useAdminCollections({
+    searchQuery: debouncedSearch || undefined,
+    visibility: selectedVisibility,
+  })
+
+  const {
+    createCollection,
+    updateCollection,
+    deleteCollection,
+    toggleActive,
+    reorderCollections,
+  } = useCollectionMutations()
+
+  // 4. Reorder Mode State
+  const [isReorderMode, setIsReorderMode] = useState(false)
+  const [reorderedList, setReorderedList] = useState<AdminCollectionItem[]>([])
+  const [isSavingOrder, setIsSavingOrder] = useState(false)
+
+  // Keep reordered list synced when collections arrive or reorder mode opens
+  useEffect(() => {
+    setReorderedList(rawCollections)
+  }, [rawCollections])
+
+  const handleToggleReorderMode = () => {
+    if (isReorderMode) {
+      // Cancel & restore
+      setReorderedList(rawCollections)
+      setIsReorderMode(false)
+    } else {
+      setReorderedList(rawCollections)
+      setIsReorderMode(true)
+    }
+  }
+
+  const handleMoveUp = (index: number) => {
+    if (index <= 0) return
+    setReorderedList((prev) => {
+      const next = [...prev]
+      const temp = next[index]
+      next[index] = next[index - 1]
+      next[index - 1] = temp
+      return next
+    })
+  }
+
+  const handleMoveDown = (index: number) => {
+    if (index >= reorderedList.length - 1) return
+    setReorderedList((prev) => {
+      const next = [...prev]
+      const temp = next[index]
+      next[index] = next[index + 1]
+      next[index + 1] = temp
+      return next
+    })
+  }
+
+  const handleSaveOrder = async () => {
+    setIsSavingOrder(true)
+    try {
+      const updates = reorderedList.map((col, idx) => ({
+        id: col.id,
+        sort_order: (idx + 1) * 10,
+      }))
+      await reorderCollections.mutateAsync(updates)
+      setIsReorderMode(false)
+    } catch (err) {
+      console.error('Failed to save collection order:', err)
+    } finally {
+      setIsSavingOrder(false)
+    }
+  }
+
+  // 5. Sheet State (Add / Edit)
   const [isSheetOpen, setIsSheetOpen] = useState(false)
-  const [editingCollection, setEditingCollection] = useState<CollectionRow | null>(null)
-  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    cover_image_path: '' as string | null,
-    cover_image_alt: '',
-    is_active: true,
-    sort_order: 0,
-  })
-  const [isSaving, setIsSaving] = useState(false)
-  const [sheetError, setSheetError] = useState<string | null>(null)
-
-  // Delete State
-  const [collectionToDelete, setCollectionToDelete] = useState<CollectionRow | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [editingCollection, setEditingCollection] = useState<AdminCollectionItem | null>(null)
 
   const handleOpenAdd = () => {
     setEditingCollection(null)
-    setIsSlugManuallyEdited(false)
-    setFormData({
-      name: '',
-      slug: '',
-      description: '',
-      cover_image_path: null,
-      cover_image_alt: '',
-      is_active: true,
-      sort_order: (collections.length || 0) + 1,
-    })
-    setSheetError(null)
     setIsSheetOpen(true)
   }
 
-  const handleOpenEdit = (col: CollectionRow) => {
+  const handleOpenEdit = (col: AdminCollectionItem) => {
     setEditingCollection(col)
-    setIsSlugManuallyEdited(true)
-    setFormData({
-      name: col.name,
-      slug: col.slug,
-      description: col.description || '',
-      cover_image_path: col.cover_image_path,
-      cover_image_alt: col.cover_image_alt || '',
-      is_active: col.is_active,
-      sort_order: col.sort_order,
-    })
-    setSheetError(null)
     setIsSheetOpen(true)
   }
 
@@ -75,76 +184,55 @@ export const AdminCollectionsPage: React.FC = () => {
     setEditingCollection(null)
   }
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value
-    setFormData((prev) => ({
-      ...prev,
-      name,
-      slug: isSlugManuallyEdited ? prev.slug : name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'),
-    }))
+  const handleSaveSheet = async ({
+    data,
+    oldCoverPath,
+  }: {
+    data: CollectionInsert | CollectionUpdate
+    oldCoverPath?: string | null
+  }) => {
+    if (editingCollection) {
+      await updateCollection.mutateAsync({
+        id: editingCollection.id,
+        updates: data as CollectionUpdate,
+        oldCoverPath,
+      })
+    } else {
+      await createCollection.mutateAsync(data as CollectionInsert)
+    }
   }
 
-  const handleRegenerateSlug = () => {
-    setFormData((prev) => ({
-      ...prev,
-      slug: prev.name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-'),
-    }))
-    setIsSlugManuallyEdited(false)
+  // 6. Visibility Deactivation Dialog State
+  const [collectionToDeactivate, setCollectionToDeactivate] =
+    useState<AdminCollectionItem | null>(null)
+
+  const handleToggleActive = (col: AdminCollectionItem) => {
+    if (col.is_active) {
+      // Prompt confirmation before hiding an active collection
+      setCollectionToDeactivate(col)
+    } else {
+      // Activating is safe, trigger directly
+      toggleActive.mutate({ id: col.id, is_active: true })
+    }
   }
 
-  const handleSaveCollection = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!formData.name.trim()) {
-      setSheetError('Collection name is required')
-      return
-    }
-    if (!formData.slug.trim()) {
-      setSheetError('Slug is required')
-      return
-    }
-
-    setIsSaving(true)
-    setSheetError(null)
-
+  const handleConfirmDeactivate = async () => {
+    if (!collectionToDeactivate) return
     try {
-      if (editingCollection) {
-        await updateCollection.mutateAsync({
-          id: editingCollection.id,
-          updates: {
-            name: formData.name.trim(),
-            slug: formData.slug.trim(),
-            description: formData.description.trim() || null,
-            cover_image_path: formData.cover_image_path || null,
-            cover_image_alt: formData.cover_image_alt.trim() || null,
-            is_active: formData.is_active,
-            sort_order: formData.sort_order,
-          },
-          oldCoverPath: editingCollection.cover_image_path,
-        })
-      } else {
-        await createCollection.mutateAsync({
-          name: formData.name.trim(),
-          slug: formData.slug.trim(),
-          description: formData.description.trim() || null,
-          cover_image_path: formData.cover_image_path || null,
-          cover_image_alt: formData.cover_image_alt.trim() || null,
-          is_active: formData.is_active,
-          sort_order: formData.sort_order,
-        })
-      }
-      handleCloseSheet()
-    } catch (err: unknown) {
-      console.error('Failed to save collection:', err)
-      const msg = (err instanceof Error ? err.message : null) || 'Failed to save collection record.'
-      if (msg.includes('unique') || msg.includes('duplicate') || msg.includes('collections_slug_key')) {
-        setSheetError('A collection with this slug already exists.')
-      } else {
-        setSheetError(msg)
-      }
-    } finally {
-      setIsSaving(false)
+      await toggleActive.mutateAsync({
+        id: collectionToDeactivate.id,
+        is_active: false,
+      })
+      setCollectionToDeactivate(null)
+    } catch (err) {
+      console.error('Failed to hide collection:', err)
     }
   }
+
+  // 7. Delete Dialog State
+  const [collectionToDelete, setCollectionToDelete] =
+    useState<AdminCollectionItem | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDeleteConfirm = async () => {
     if (!collectionToDelete) return
@@ -162,316 +250,221 @@ export const AdminCollectionsPage: React.FC = () => {
     }
   }
 
-  const columns: Column<CollectionRow>[] = [
-    {
-      header: 'Collection',
-      accessor: (row) => {
-        const thumbUrl = row.cover_image_path
-          ? getMediaUrl('brand-assets', row.cover_image_path, 'thumbnail')
-          : null
+  // 8. Filters Reset
+  const handleResetFilters = () => {
+    setSearchQuery('')
+    setDebouncedSearch('')
+    setSelectedVisibility('all')
+  }
 
-        return (
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-none bg-[#171717] border border-[#2A2A2A] overflow-hidden shrink-0 flex items-center justify-center">
-              {thumbUrl ? (
-                <img
-                  src={thumbUrl}
-                  alt={row.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <span className="text-[10px] font-mono text-[#7A746B]">No Cover</span>
-              )}
-            </div>
-            <div>
-              <div className="font-medium text-[#F5F0E8]">{row.name}</div>
-              <div className="text-[11px] text-[#7A746B] font-mono">slug: {row.slug}</div>
-            </div>
-          </div>
-        )
-      },
-    },
-    {
-      header: 'Sort Order',
-      accessor: (row) => (
-        <span className="font-mono text-xs text-[#D1CCC2]/90">{row.sort_order}</span>
-      ),
-      className: 'hidden sm:table-cell',
-    },
-    {
-      header: 'Visibility',
-      accessor: (row) => (
-        <button
-          type="button"
-          onClick={() => toggleActive.mutate({ id: row.id, is_active: !row.is_active })}
-          disabled={toggleActive.isPending}
-          className={`px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-semibold border transition-all cursor-pointer ${row.is_active
-            ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60 hover:bg-emerald-900/60'
-            : 'bg-[#171717] text-[#9B958B] border-[#2A2A2A] hover:text-[#F5F0E8]'
-            }`}
-        >
-          {row.is_active ? 'Active' : 'Hidden'}
-        </button>
-      ),
-    },
-    {
-      header: 'Updated',
-      accessor: (row) => (
-        <span className="text-[11px] text-[#7A746B] font-mono">
-          {formatDate(row.updated_at || row.created_at)}
-        </span>
-      ),
-      className: 'hidden md:table-cell',
-    },
-  ]
-
-  const renderActions = (row: CollectionRow) => (
-    <div className="flex items-center justify-end gap-2">
-      <button
-        type="button"
-        onClick={() => handleOpenEdit(row)}
-        className="px-2.5 py-1.5 text-xs text-[#C9A84C] hover:text-[#E8B84B] font-mono font-semibold rounded hover:bg-[#171717] transition-colors"
-      >
-        Edit
-      </button>
-      <button
-        type="button"
-        onClick={() => setCollectionToDelete(row)}
-        className="px-2.5 py-1.5 text-xs text-red-400 hover:text-red-300 font-mono rounded hover:bg-red-950/40 transition-colors"
-      >
-        Delete
-      </button>
-    </div>
+  const displayedCollections = isReorderMode ? reorderedList : rawCollections
+  const totalCount = rawCollections.length
+  const activeCount = useMemo(
+    () => rawCollections.filter((c) => c.is_active).length,
+    [rawCollections]
   )
 
+  const isDatabaseEmpty =
+    !isLoading &&
+    totalCount === 0 &&
+    !debouncedSearch &&
+    selectedVisibility === 'all'
+
+  const isNoFilterMatches =
+    !isLoading &&
+    totalCount === 0 &&
+    (Boolean(debouncedSearch) || selectedVisibility !== 'all')
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <PageHeader
-        variant="admin"
-        title="Collections"
-        description="Organize furniture into public catalogue collections and curated editorial themes."
-        actions={
-          <GoldButton onClick={handleOpenAdd} size="sm" className="text-xs uppercase tracking-wider">
-            + Add Collection
-          </GoldButton>
-        }
-      />
-
-      {/* Collections DataTable */}
-      <AdminDataTable<CollectionRow>
-        columns={columns}
-        data={collections}
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        onRetry={refetch}
-        emptyTitle="No collections found"
-        emptyDescription="Create your first room collection to organize furniture pieces."
-        emptyAction={
-          <GoldButton onClick={handleOpenAdd} size="sm">
-            + Create Collection
-          </GoldButton>
-        }
-        renderActions={renderActions}
-        keyExtractor={(row) => row.id}
-      />
-
-      {/* Add / Edit Slide-Over Sheet */}
-      {isSheetOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm animate-fade-in"
-            onClick={handleCloseSheet}
-          />
-
-          <div className="relative z-10 w-full sm:max-w-md md:max-w-lg bg-[#111111] border-l border-[#2A2A2A] h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left">
-            <div className="px-6 py-5 border-b border-[#2A2A2A] flex items-center justify-between bg-[#141414]">
-              <h2 className="text-base font-serif font-semibold text-[#F5F0E8]">
-                {editingCollection ? `Edit Collection: ${editingCollection.name}` : 'Add Collection'}
-              </h2>
-              <button
-                type="button"
-                onClick={handleCloseSheet}
-                className="p-2 text-[#9B958B] hover:text-[#F5F0E8] rounded-none transition-colors cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveCollection} className="flex-1 p-6 space-y-5 overflow-y-auto font-sans text-xs">
-              {sheetError && (
-                <div className="p-3.5 bg-red-950/40 border border-red-800 text-red-300 text-xs rounded-none font-sans">
-                  {sheetError}
-                </div>
-              )}
-
-              {/* Name */}
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-mono uppercase text-[#F5F0E8] font-semibold">
-                  Collection Name <span className="text-[#C9A84C]">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleNameChange}
-                  placeholder="e.g. Dining & Banquet"
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-4 py-2.5 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
-                />
-              </div>
-
-              {/* Slug */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-[11px] font-mono uppercase text-[#F5F0E8] font-semibold">
-                    URL Slug <span className="text-[#C9A84C]">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleRegenerateSlug}
-                    className="text-[10px] text-[#C9A84C] hover:text-[#E8B84B] font-mono"
-                  >
-                    Auto-Generate
-                  </button>
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={formData.slug}
-                  onChange={(e) => {
-                    setIsSlugManuallyEdited(true)
-                    setFormData({ ...formData, slug: e.target.value })
-                  }}
-                  placeholder="dining-banquet"
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-4 py-2.5 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none font-mono"
-                />
-              </div>
-
-              {/* Description */}
-              <div className="space-y-1.5">
-                <label className="block text-[11px] font-mono uppercase text-[#F5F0E8] font-semibold">
-                  Description
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Curated solid wood furniture designed for architectural living spaces..."
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none p-3 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none leading-relaxed resize-none"
-                />
-              </div>
-
-              {/* Sort Order */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="block text-[11px] font-mono uppercase text-[#F5F0E8] font-semibold">
-                    Sort Order
-                  </label>
-                  <span className="text-[10px] text-[#7A746B] font-mono">Lower values appear first</span>
-                </div>
-                <input
-                  type="number"
-                  min={0}
-                  value={formData.sort_order}
-                  onChange={(e) =>
-                    setFormData({ ...formData, sort_order: parseInt(e.target.value, 10) || 0 })
-                  }
-                  className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-4 py-2.5 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
-                />
-              </div>
-
-              {/* Active Toggle */}
-              <div className="flex items-center justify-between p-3.5 bg-[#171717] rounded-none border border-[#2A2A2A]">
-                <div>
-                  <div className="font-medium text-[#F5F0E8] text-xs">Public Visibility</div>
-                  <div className="text-[11px] text-[#9B958B]">
-                    Active collections are available to public catalogue visitors.
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                  className="w-4 h-4 accent-[#C9A84C] cursor-pointer"
-                />
-              </div>
-
-              {/* Cover Image Upload */}
-              <div className="space-y-3 pt-2 border-t border-[#2A2A2A]">
-                <label className="block text-[11px] font-mono uppercase text-[#F5F0E8] font-semibold">
-                  Cover Image & Photography
-                </label>
-                {formData.cover_image_path ? (
-                  <div className="space-y-2">
-                    <div className="relative aspect-[16/9] rounded-none overflow-hidden bg-[#0A0A0A] border border-[#2A2A2A] group">
-                      <img
-                        src={getMediaUrl('brand-assets', formData.cover_image_path, 'card')}
-                        alt={formData.cover_image_alt || formData.name}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ ...formData, cover_image_path: null })}
-                        className="absolute top-2 right-2 p-1.5 bg-red-950/80 text-red-300 rounded-none text-xs hover:bg-red-900 transition-colors"
-                      >
-                        Remove Cover
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={formData.cover_image_alt}
-                      onChange={(e) => setFormData({ ...formData, cover_image_alt: e.target.value })}
-                      placeholder="Cover image accessibility alt text..."
-                      className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-3 py-2 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
-                    />
-                  </div>
-                ) : (
-                  <AdminImageUploader
-                    maxFiles={1}
-                    onUploadFiles={async (files) => {
-                      if (files.length === 0) return
-                      const file = files[0]
-                      const fileExt = file.name.split('.').pop()
-                      const filePath = `collections/${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`
-                      const { error: uploadErr } = await supabase.storage
-                        .from('brand-assets')
-                        .upload(filePath, file, { upsert: false })
-                      if (uploadErr) throw uploadErr
-                      setFormData((prev) => ({
-                        ...prev,
-                        cover_image_path: filePath,
-                        cover_image_alt: prev.cover_image_alt || file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
-                      }))
-                    }}
-                  />
-                )}
-              </div>
-
-              <div className="pt-4 border-t border-[#2A2A2A] flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={handleCloseSheet}
-                  className="px-4 py-2 text-xs text-[#9B958B] hover:text-[#F5F0E8] rounded-none border border-[#2A2A2A]"
-                >
-                  Cancel
-                </button>
-                <GoldButton
-                  type="submit"
-                  size="sm"
-                  loading={isSaving}
-                  loadingText="Saving..."
-                >
-                  {editingCollection ? 'Update Collection' : 'Create Collection'}
-                </GoldButton>
-              </div>
-            </form>
+    <div className="space-y-6 max-w-[1600px] w-full mx-auto select-none font-sans">
+      {/* 1. Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#222222]">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-[#F5F0E8] tracking-tight">
+              Collections
+            </h1>
+            {!isLoading && (
+              <span className="px-2.5 py-0.5 rounded-full bg-[#181818] border border-[#2A2A2A] text-xs font-mono text-[#9B958B]">
+                {totalCount} {totalCount === 1 ? 'collection' : 'collections'} · {activeCount} active
+              </span>
+            )}
+            {isFetching && !isLoading && (
+              <HugeiconsIcon
+                icon={RefreshIcon}
+                className="w-3.5 h-3.5 text-[#C9A84C] animate-spin"
+              />
+            )}
           </div>
+          <p className="text-xs sm:text-sm text-[#8A847A] font-normal leading-relaxed">
+            Organize public catalogue collections, covers, visibility and display order.
+          </p>
+        </div>
+
+        <GoldButton
+          onClick={handleOpenAdd}
+          size="sm"
+          icon={<HugeiconsIcon icon={PlusSignIcon} className="w-3.5 h-3.5" />}
+          className="text-xs uppercase font-mono tracking-wider font-semibold w-full sm:w-auto shrink-0"
+        >
+          Add Collection
+        </GoldButton>
+      </div>
+
+      {/* 2. Collection Command Bar */}
+      <AdminCollectionsToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedVisibility={selectedVisibility}
+        onVisibilityChange={setSelectedVisibility}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        isReorderMode={isReorderMode}
+        onToggleReorderMode={handleToggleReorderMode}
+        onResetFilters={handleResetFilters}
+      />
+
+      {/* 3. Reorder Mode Actions Bar */}
+      {isReorderMode && (
+        <AdminCollectionReorderBar
+          isSaving={isSavingOrder}
+          hasChanges={JSON.stringify(reorderedList) !== JSON.stringify(rawCollections)}
+          onSave={handleSaveOrder}
+          onCancel={handleToggleReorderMode}
+        />
+      )}
+
+      {/* 4. Collection Studio Workspace */}
+      {isLoading ? (
+        /* Loading Skeletons */
+        viewMode === 'list' ? (
+          <div className="bg-[#111111] border border-[#242424] rounded-lg p-4 space-y-3">
+            {[1, 2, 3, 4].map((idx) => (
+              <div
+                key={idx}
+                className="h-16 bg-[#161616] rounded border border-[#222222] animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((idx) => (
+              <div
+                key={idx}
+                className="h-64 bg-[#111111] border border-[#242424] rounded-lg animate-pulse"
+              />
+            ))}
+          </div>
+        )
+      ) : isError ? (
+        /* Localized Error State */
+        <div className="p-12 text-center bg-[#111111] border border-[#242424] rounded-lg space-y-3">
+          <p className="text-xs sm:text-sm text-red-400">
+            {error?.message || 'We could not load collections at this time.'}
+          </p>
+          <GoldButton onClick={() => refetch()} size="sm">
+            Try Again
+          </GoldButton>
+        </div>
+      ) : isDatabaseEmpty ? (
+        /* Empty Database State */
+        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-lg space-y-3">
+          <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#7A746B] flex items-center justify-center mx-auto">
+            <HugeiconsIcon icon={Layers01Icon} className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold text-[#F5F0E8]">
+              No collections yet
+            </h2>
+            <p className="text-xs text-[#8A847A] max-w-sm mx-auto">
+              Create a collection to organize products on the public catalogue.
+            </p>
+          </div>
+          <div className="pt-2">
+            <GoldButton
+              onClick={handleOpenAdd}
+              size="sm"
+              icon={<HugeiconsIcon icon={PlusSignIcon} className="w-3.5 h-3.5" />}
+            >
+              Add Collection
+            </GoldButton>
+          </div>
+        </div>
+      ) : isNoFilterMatches ? (
+        /* No Filter Matches State */
+        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-lg space-y-3">
+          <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#7A746B] flex items-center justify-center mx-auto">
+            <HugeiconsIcon icon={Search01Icon} className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold text-[#F5F0E8]">
+              No collections match these filters
+            </h2>
+            <p className="text-xs text-[#8A847A] max-w-sm mx-auto">
+              Try adjusting your search query or visibility filter.
+            </p>
+          </div>
+          <div className="pt-2 flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="px-4 py-2 text-xs font-medium text-[#C9A84C] hover:text-[#E8B84B] underline transition-colors cursor-pointer"
+            >
+              Reset Filters
+            </button>
+            <GoldButton onClick={handleOpenAdd} size="sm">
+              Add Collection
+            </GoldButton>
+          </div>
+        </div>
+      ) : (
+        /* Active Collection List or Board View */
+        <div className="space-y-6">
+          {viewMode === 'list' ? (
+            <AdminCollectionsTable
+              collections={displayedCollections}
+              onEdit={handleOpenEdit}
+              onToggleActive={handleToggleActive}
+              onDelete={(col) => setCollectionToDelete(col)}
+              isPendingActive={toggleActive.isPending}
+              isReorderMode={isReorderMode}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+            />
+          ) : (
+            <AdminCollectionBoard
+              collections={displayedCollections}
+              onEdit={handleOpenEdit}
+              onToggleActive={handleToggleActive}
+              onDelete={(col) => setCollectionToDelete(col)}
+              isPendingActive={toggleActive.isPending}
+              isReorderMode={isReorderMode}
+              onMoveUp={handleMoveUp}
+              onMoveDown={handleMoveDown}
+            />
+          )}
         </div>
       )}
 
-      {/* Delete Confirmation */}
+      {/* 5. Add / Edit Slide-Over Sheet */}
+      <AdminCollectionSheet
+        isOpen={isSheetOpen}
+        collection={editingCollection}
+        totalCollectionsCount={totalCount}
+        onClose={handleCloseSheet}
+        onSave={handleSaveSheet}
+      />
+
+      {/* 6. Visibility Deactivation Confirmation Dialog */}
+      <CollectionDeactivateDialog
+        isOpen={Boolean(collectionToDeactivate)}
+        collection={collectionToDeactivate}
+        onConfirm={handleConfirmDeactivate}
+        onCancel={() => setCollectionToDeactivate(null)}
+        isPending={toggleActive.isPending}
+      />
+
+      {/* 7. Safe Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         isOpen={Boolean(collectionToDelete)}
         recordType="Collection"
