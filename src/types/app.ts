@@ -68,7 +68,7 @@ export interface AdminInquiryProductRef {
   name: string
   slug: string
   is_published?: boolean
-  primary_image?: string | null
+  cover_image_path?: string | null
 }
 
 export interface AdminInquiryListItem extends InquiryRow {

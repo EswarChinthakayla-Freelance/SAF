@@ -20,8 +20,8 @@ export const InquiryProductContext: React.FC<InquiryProductContextProps> = ({ in
     return null
   }
 
-  const thumbnailUrl = product?.primary_image
-    ? getMediaUrl('product-images', product.primary_image, 'thumbnail')
+  const thumbnailUrl = product?.cover_image_path
+    ? getMediaUrl('product-images', product.cover_image_path, 'thumbnail')
     : null
 
   return (

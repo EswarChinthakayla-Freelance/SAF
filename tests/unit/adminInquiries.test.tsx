@@ -18,7 +18,7 @@ const mockInquiries: AdminInquiryListItem[] = [
       name: 'Sanctuary Teak Bed Frame',
       slug: 'sanctuary-teak-bed-frame',
       is_published: true,
-      primary_image: 'teak-bed.jpg',
+      cover_image_path: 'teak-bed.jpg',
     },
     subject: 'Teak Bed Frame Inquiry',
     message: 'Looking for a King size solid teak sanctuary bed frame with rattan headboard.',
