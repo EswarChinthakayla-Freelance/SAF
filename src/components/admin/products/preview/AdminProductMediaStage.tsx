@@ -41,7 +41,7 @@ export const AdminProductMediaStage: React.FC<AdminProductMediaStageProps> = ({ 
   return (
     <div className="space-y-3">
       {/* Primary Stage */}
-      <div className="relative aspect-[4/3] w-full rounded-lg bg-[#121212] border border-[#242424] overflow-hidden flex items-center justify-center group shadow-lg">
+      <div className="relative aspect-[4/3] w-full rounded-none bg-[#121212] border border-[#242424] overflow-hidden flex items-center justify-center group shadow-lg">
         {activeImage?.storage_path ? (
           <img
             src={getMediaUrl('product-images', activeImage.storage_path, 'detail')}
@@ -83,11 +83,10 @@ export const AdminProductMediaStage: React.FC<AdminProductMediaStageProps> = ({ 
                 type="button"
                 onClick={() => setActiveIndex(idx)}
                 aria-label={`View image ${idx + 1} of ${images.length}: ${img.alt_text || product.name}`}
-                className={`relative shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-md bg-[#141414] border overflow-hidden transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] ${
-                  isSelected
-                    ? 'border-[#C9A84C] ring-1 ring-[#C9A84C] shadow-md'
-                    : 'border-[#262626] hover:border-[#3E3E3E] opacity-70 hover:opacity-100'
-                }`}
+                className={`relative shrink-0 w-16 h-16 sm:w-18 sm:h-18 rounded-none bg-[#141414] border overflow-hidden transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] ${isSelected
+                  ? 'border-[#C9A84C] ring-1 ring-[#C9A84C] shadow-md'
+                  : 'border-[#262626] hover:border-[#3E3E3E] opacity-70 hover:opacity-100'
+                  }`}
               >
                 <img
                   src={getMediaUrl('product-images', img.storage_path, 'thumbnail')}

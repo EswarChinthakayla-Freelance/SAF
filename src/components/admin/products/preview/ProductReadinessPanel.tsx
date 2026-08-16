@@ -91,7 +91,7 @@ export const ProductReadinessPanel: React.FC<ProductReadinessPanelProps> = ({ pr
   ]
 
   return (
-    <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-5 shadow-lg">
+    <section className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-5 shadow-lg">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
           <HugeiconsIcon icon={SparklesIcon} className="w-4 h-4" />
@@ -101,7 +101,7 @@ export const ProductReadinessPanel: React.FC<ProductReadinessPanelProps> = ({ pr
 
       {/* Needs Attention Alert (if any) */}
       {attentionItems.length > 0 && (
-        <div className="bg-[#1C1708] border border-[#B45309]/50 rounded-md p-3.5 sm:p-4 space-y-2">
+        <div className="bg-[#1C1708] border border-[#B45309]/50 rounded-none p-3.5 sm:p-4 space-y-2">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#FBBF24]">
             <HugeiconsIcon icon={AlertCircleIcon} className="w-4 h-4 text-[#F59E0B]" />
             <span>Catalogue Items Requiring Attention</span>
@@ -119,16 +119,15 @@ export const ProductReadinessPanel: React.FC<ProductReadinessPanelProps> = ({ pr
         {checklistItems.map((item) => (
           <div
             key={item.label}
-            className="bg-[#181818] border border-[#262626] rounded-md p-3 space-y-1 text-xs font-sans"
+            className="bg-[#181818] border border-[#262626] rounded-none p-3 space-y-1 text-xs font-sans"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-[#F5F0E8] font-medium">{item.label}</span>
               <span
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono ${
-                  item.isReady
-                    ? 'bg-[#0D1510] text-[#4ADE80] border border-[#166534]'
-                    : 'bg-[#1C1708] text-[#FBBF24] border border-[#B45309]'
-                }`}
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono ${item.isReady
+                  ? 'bg-[#0D1510] text-[#4ADE80] border border-[#166534]'
+                  : 'bg-[#1C1708] text-[#FBBF24] border border-[#B45309]'
+                  }`}
               >
                 <HugeiconsIcon
                   icon={item.isReady ? CheckmarkCircle02Icon : AlertCircleIcon}

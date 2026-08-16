@@ -40,14 +40,14 @@ export const AdminProductSummary: React.FC<AdminProductSummaryProps> = ({ produc
 
   const publishedDateFormatted = product.published_at
     ? new Intl.DateTimeFormat('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      }).format(new Date(product.published_at))
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(product.published_at))
     : null
 
   return (
-    <div className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-5 shadow-lg">
+    <div className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-5 shadow-lg">
       {/* Price & Valuation Stage */}
       <div className="pb-4 border-b border-[#222222] space-y-1">
         <span className="text-[11px] font-sans uppercase tracking-wider text-[#7A746B]">

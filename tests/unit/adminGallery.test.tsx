@@ -4,32 +4,51 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AdminGalleryPage } from '@/pages/admin/AdminGalleryPage'
-import type { GalleryImageRow } from '@/types/app'
+import type { AdminGalleryItem, AdminGalleryListResult } from '@/types/app'
 
-const mockGalleryImages: GalleryImageRow[] = [
+const mockGalleryImages: AdminGalleryItem[] = [
   {
     id: 'gal-1',
     storage_path: 'inspiration/living1.webp',
     alt_text: 'Living room architectural setting with teak sofa',
     room_type: 'Living Room',
-    product_id: null,
+    product_id: 'prod-teak-sofa',
     sort_order: 1,
     is_active: true,
     created_at: '2026-08-01T00:00:00Z',
-    updated_at: '2026-08-01T00:00:00Z',
+    updated_at: '2026-08-16T12:00:00Z',
+    products: {
+      id: 'prod-teak-sofa',
+      name: 'Architectural Teak Sofa',
+      slug: 'architectural-teak-sofa',
+      product_code: 'SAF-SOF-001',
+      cover_image_path: 'products/sofa.jpg',
+      is_published: true,
+      price: 95000,
+    },
   },
   {
     id: 'gal-2',
     storage_path: 'inspiration/dining1.webp',
     alt_text: 'Solid teak dining suite in ambient sunlight',
-    room_type: 'Dining Room',
+    room_type: 'Dining',
     product_id: null,
     sort_order: 2,
     is_active: false,
     created_at: '2026-08-01T00:00:00Z',
-    updated_at: '2026-08-01T00:00:00Z',
+    updated_at: '2026-08-16T12:00:00Z',
+    products: null,
   },
 ]
+
+const mockGalleryListResult: AdminGalleryListResult = {
+  images: mockGalleryImages,
+  totalCount: 2,
+  activeCount: 1,
+  page: 1,
+  pageSize: 24,
+  totalPages: 1,
+}
 
 const mockToggleActive = vi.fn()
 const mockReorder = vi.fn()
@@ -37,17 +56,29 @@ const mockDelete = vi.fn()
 
 vi.mock('@/hooks/queries/useGallery', () => ({
   useAdminGallery: () => ({
-    data: mockGalleryImages,
+    data: mockGalleryListResult,
     isLoading: false,
     isError: false,
     error: null,
     refetch: vi.fn(),
   }),
+  useAdminGallerySequence: () => ({
+    data: mockGalleryImages,
+    isLoading: false,
+    isError: false,
+    error: null,
+  }),
 }))
 
 vi.mock('@/hooks/queries/useProducts', () => ({
   useAdminProducts: () => ({
-    data: { products: [], totalCount: 0, totalPages: 1 },
+    data: {
+      products: [
+        { id: 'prod-teak-sofa', name: 'Architectural Teak Sofa', product_code: 'SAF-SOF-001' },
+      ],
+      totalCount: 1,
+      totalPages: 1,
+    },
     isLoading: false,
     isError: false,
     error: null,
@@ -78,52 +109,101 @@ const renderGalleryPage = () => {
   )
 }
 
-describe('AdminGalleryPage Component', () => {
+describe('AdminGalleryPage — "The Media Studio"', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders gallery visual grid with room types, alt captions, and active states', () => {
+  it('renders clean Inter heading, breadcrumbs, and stats counter', () => {
+    renderGalleryPage()
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Gallery' })).toBeDefined()
+    expect(screen.getByText('2 images')).toBeDefined()
+    expect(screen.getByText('1 active')).toBeDefined()
+    expect(screen.getByRole('button', { name: /Upload Images/i })).toBeDefined()
+    expect(screen.getByRole('button', { name: /Reorder/i })).toBeDefined()
+  })
+
+  it('renders Media Command Bar with search, room, visibility and product filters', () => {
+    renderGalleryPage()
+
+    expect(screen.getByPlaceholderText('Search gallery images...')).toBeDefined()
+    expect(screen.getByText('All Rooms')).toBeDefined()
+    expect(screen.getByText('All Visibility')).toBeDefined()
+    expect(screen.getByText('All Images')).toBeDefined()
+  })
+
+  it('renders media tiles with room badges, visibility status, linked product and View action', () => {
     renderGalleryPage()
 
     expect(screen.getByText('Living Room')).toBeDefined()
-    expect(screen.getByText('Dining Room')).toBeDefined()
+    expect(screen.getByText('Dining')).toBeDefined()
     expect(screen.getByText('Living room architectural setting with teak sofa')).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Active' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Hidden' })).toBeDefined()
+    expect(screen.getByText('Solid teak dining suite in ambient sunlight')).toBeDefined()
+    expect(screen.getByText('Architectural Teak Sofa')).toBeDefined()
+    expect(screen.getByText('No linked product')).toBeDefined()
+    expect(screen.getByText('Order 01')).toBeDefined()
+    expect(screen.getByText('Order 02')).toBeDefined()
+
+    const viewButtons = screen.getAllByRole('button', { name: 'View' })
+    expect(viewButtons.length).toBe(2)
   })
 
-  it('toggles active status when Active/Hidden button is clicked', () => {
+  it('toggles Reorder Mode and enables drag/button reordering', async () => {
     renderGalleryPage()
 
-    const activeBtn = screen.getByRole('button', { name: 'Active' })
-    fireEvent.click(activeBtn)
+    const reorderBtn = screen.getByRole('button', { name: 'Reorder' })
+    fireEvent.click(reorderBtn)
 
-    expect(mockToggleActive).toHaveBeenCalledWith({
-      id: 'gal-1',
-      is_active: false,
-    })
+    expect(screen.getByText(/Reorder Mode Active/i)).toBeDefined()
+    expect(screen.getByRole('button', { name: /Save Order/i })).toBeDefined()
+
+    const saveOrderBtn = screen.getByRole('button', { name: /Save Order/i })
+    fireEvent.click(saveOrderBtn)
+
+    expect(mockReorder).toHaveBeenCalled()
   })
 
-  it('opens metadata editing Sheet when Edit Metadata is clicked', () => {
+  it('opens Bulk Upload workspace when Upload Images is clicked', () => {
     renderGalleryPage()
 
-    const editBtns = screen.getAllByRole('button', { name: /Edit Metadata/i })
-    fireEvent.click(editBtns[0])
+    const uploadBtn = screen.getByRole('button', { name: /Upload Images/i })
+    fireEvent.click(uploadBtn)
+
+    expect(screen.getByText('Bulk Media Upload Workspace')).toBeDefined()
+    expect(screen.getByText(/Click to choose files or drag & drop photographs here/i)).toBeDefined()
+  })
+
+  it('opens metadata editing Sheet from tile More menu', () => {
+    renderGalleryPage()
+
+    const moreButtons = screen.getAllByRole('button', { name: /More actions for/i })
+    fireEvent.click(moreButtons[0])
+
+    const editItem = screen.getByText('Edit Metadata')
+    fireEvent.click(editItem)
 
     expect(screen.getByText('Edit Image Metadata')).toBeDefined()
     expect(screen.getByDisplayValue('Living room architectural setting with teak sofa')).toBeDefined()
   })
 
-  it('opens delete confirmation dialog explaining storage removal', () => {
+  it('opens delete confirmation dialog and executes deletion', () => {
     renderGalleryPage()
 
-    const deleteBtns = screen.getAllByRole('button', { name: 'Delete' })
-    fireEvent.click(deleteBtns[0])
+    const moreButtons = screen.getAllByRole('button', { name: /More actions for/i })
+    fireEvent.click(moreButtons[0])
 
-    expect(screen.getByRole('heading', { level: 3 })).toBeDefined()
-    expect(
-      screen.getByText(/Are you sure you want to delete this inspiration image from the public gallery and storage\?/i)
-    ).toBeDefined()
+    const deleteItem = screen.getByText('Delete Image')
+    fireEvent.click(deleteItem)
+
+    expect(screen.getByText(/This will permanently delete this visual from the public inspiration gallery/i)).toBeDefined()
+
+    const confirmDeleteBtn = screen.getByRole('button', { name: 'Delete Visual' })
+    fireEvent.click(confirmDeleteBtn)
+
+    expect(mockDelete).toHaveBeenCalledWith({
+      id: 'gal-1',
+      storagePath: 'inspiration/living1.webp',
+    })
   })
 })

@@ -129,7 +129,7 @@ export const AdminProductPreviewHeader: React.FC<AdminProductPreviewHeaderProps>
               href={`/products/${product.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-sans font-medium rounded-md bg-[#161616] hover:bg-[#202020] border border-[#2A2A2A] hover:border-[#383838] text-[#D1CCC2] hover:text-[#F5F0E8] transition-colors"
+              className="inline-flex items-center gap-1.5 h-9 px-3 text-xs font-sans font-medium rounded-none bg-[#161616] hover:bg-[#202020] border border-[#2A2A2A] hover:border-[#383838] text-[#D1CCC2] hover:text-[#F5F0E8] transition-colors"
             >
               <HugeiconsIcon icon={GlobeIcon} className="w-3.5 h-3.5 text-[#9B958B]" />
               <span className="hidden md:inline">View on Website</span>
@@ -140,7 +140,7 @@ export const AdminProductPreviewHeader: React.FC<AdminProductPreviewHeaderProps>
           <button
             type="button"
             onClick={() => navigate(`/admin/products/${product.id}`)}
-            className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-md text-xs font-sans font-semibold bg-[#C9A84C] hover:bg-[#E8B84B] text-[#0A0A0A] shadow-md transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-none text-xs font-sans font-semibold bg-[#C9A84C] hover:bg-[#E8B84B] text-[#0A0A0A] shadow-md transition-all cursor-pointer"
           >
             <HugeiconsIcon icon={Edit01Icon} className="w-3.5 h-3.5" />
             <span>Edit Product</span>
@@ -150,14 +150,14 @@ export const AdminProductPreviewHeader: React.FC<AdminProductPreviewHeaderProps>
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label={`More actions for ${product.name}`}
-              className="inline-flex items-center justify-center h-9 w-9 rounded-md bg-[#161616] hover:bg-[#202020] border border-[#2A2A2A] hover:border-[#383838] text-[#9B958B] hover:text-[#F5F0E8] transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center h-9 w-9 rounded-none bg-[#161616] hover:bg-[#202020] border border-[#2A2A2A] hover:border-[#383838] text-[#9B958B] hover:text-[#F5F0E8] transition-colors cursor-pointer"
             >
               <HugeiconsIcon icon={MoreHorizontalIcon} className="w-4 h-4" />
             </DropdownMenuTrigger>
 
             <DropdownMenuContent
               align="end"
-              className="w-56 bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] shadow-2xl p-1 font-sans rounded-md"
+              className="w-56 bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] shadow-2xl p-1 font-sans rounded-none"
             >
               <DropdownMenuItem
                 onClick={handleCopySlug}

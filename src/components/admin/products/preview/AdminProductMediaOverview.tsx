@@ -20,22 +20,22 @@ export const AdminProductMediaOverview: React.FC<AdminProductMediaOverviewProps>
       ? [...images].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
       : fallbackCoverPath
         ? [
-            {
-              id: 'cover-fallback',
-              product_id: '',
-              storage_path: fallbackCoverPath,
-              alt_text: productName,
-              sort_order: 0,
-              is_cover: true,
-              created_at: '',
-            },
-          ]
+          {
+            id: 'cover-fallback',
+            product_id: '',
+            storage_path: fallbackCoverPath,
+            alt_text: productName,
+            sort_order: 0,
+            is_cover: true,
+            created_at: '',
+          },
+        ]
         : []
 
   const coverCount = displayImages.filter((img) => img.is_cover).length
 
   return (
-    <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-4 shadow-lg">
+    <section className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-4 shadow-lg">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
           <HugeiconsIcon icon={Image01Icon} className="w-4 h-4" />
@@ -55,7 +55,7 @@ export const AdminProductMediaOverview: React.FC<AdminProductMediaOverviewProps>
           {displayImages.map((img, idx) => (
             <div
               key={img.id || idx}
-              className="bg-[#181818] border border-[#282828] rounded-md overflow-hidden space-y-1.5 p-2"
+              className="bg-[#181818] border border-[#282828] rounded-none overflow-hidden space-y-1.5 p-2"
             >
               <div className="relative aspect-square w-full rounded bg-[#121212] overflow-hidden flex items-center justify-center">
                 <img

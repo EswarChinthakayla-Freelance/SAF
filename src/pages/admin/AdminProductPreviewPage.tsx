@@ -54,7 +54,7 @@ export const AdminProductPreviewPage: React.FC = () => {
         <div className="mt-6 text-center">
           <Link
             to="/admin/products"
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-[#181818] border border-[#2A2A2A] text-xs font-sans text-[#F5F0E8] hover:border-[#C9A84C] transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-none bg-[#181818] border border-[#2A2A2A] text-xs font-sans text-[#F5F0E8] hover:border-[#C9A84C] transition-colors"
           >
             <HugeiconsIcon icon={ArrowLeft01Icon} className="w-3.5 h-3.5" />
             <span>Return to Products Catalogue</span>
@@ -144,7 +144,7 @@ export const AdminProductPreviewPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(`/admin/products/${product.id}`)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md text-xs font-sans font-semibold bg-[#C9A84C] hover:bg-[#E8B84B] text-[#0A0A0A] shadow-lg transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-none text-xs font-sans font-semibold bg-[#C9A84C] hover:bg-[#E8B84B] text-[#0A0A0A] shadow-lg transition-all cursor-pointer"
         >
           <HugeiconsIcon icon={Edit01Icon} className="w-4 h-4" />
           <span>Edit Product Record</span>
@@ -155,7 +155,7 @@ export const AdminProductPreviewPage: React.FC = () => {
       <div className="fixed bottom-0 inset-x-0 sm:hidden z-40 bg-[#0E0E0E]/95 backdrop-blur-md border-t border-[#242424] p-3 px-4 flex items-center justify-between gap-3 shadow-2xl">
         <Link
           to="/admin/products"
-          className="inline-flex items-center justify-center h-10 px-3 rounded-md bg-[#161616] border border-[#2A2A2A] text-xs font-sans text-[#9B958B] hover:text-[#F5F0E8]"
+          className="inline-flex items-center justify-center h-10 px-3 rounded-none bg-[#161616] border border-[#2A2A2A] text-xs font-sans text-[#9B958B] hover:text-[#F5F0E8]"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4" />
         </Link>
@@ -163,7 +163,7 @@ export const AdminProductPreviewPage: React.FC = () => {
         <button
           type="button"
           onClick={() => navigate(`/admin/products/${product.id}`)}
-          className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md text-xs font-sans font-semibold bg-[#C9A84C] hover:bg-[#E8B84B] text-[#0A0A0A] shadow-md cursor-pointer"
+          className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 rounded-none text-xs font-sans font-semibold bg-[#C9A84C] hover:bg-[#E8B84B] text-[#0A0A0A] shadow-md cursor-pointer"
         >
           <HugeiconsIcon icon={Edit01Icon} className="w-4 h-4" />
           <span>Edit Product</span>

@@ -32,8 +32,31 @@ export interface GalleryItemWithProduct extends GalleryImageRow {
     id: string
     name: string
     slug: string
+    product_code?: string | null
+    cover_image_path?: string | null
     is_published: boolean
+    price?: number | null
   } | null
+}
+
+export type AdminGalleryItem = GalleryItemWithProduct
+
+export interface AdminGalleryFilters {
+  search?: string
+  roomType?: string
+  status?: 'all' | 'active' | 'inactive'
+  linkedStatus?: 'all' | 'linked' | 'unlinked'
+  page?: number
+  pageSize?: number
+}
+
+export interface AdminGalleryListResult {
+  images: AdminGalleryItem[]
+  totalCount: number
+  activeCount: number
+  page: number
+  pageSize: number
+  totalPages: number
 }
 
 export type InquiryRow = Database['public']['Tables']['inquiries']['Row']

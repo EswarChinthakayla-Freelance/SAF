@@ -43,7 +43,7 @@ export const AdminProductVariants: React.FC<AdminProductVariantsProps> = ({
   }
 
   return (
-    <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-4 shadow-lg">
+    <section className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-4 shadow-lg">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
           <HugeiconsIcon icon={PackageIcon} className="w-4 h-4" />
@@ -94,7 +94,7 @@ export const AdminProductVariants: React.FC<AdminProductVariantsProps> = ({
             {sortedVariants.map((v) => (
               <div
                 key={v.id}
-                className="bg-[#181818] border border-[#262626] rounded-md p-3.5 space-y-2 text-xs font-sans"
+                className="bg-[#181818] border border-[#262626] rounded-none p-3.5 space-y-2 text-xs font-sans"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>

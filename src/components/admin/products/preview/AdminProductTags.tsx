@@ -17,7 +17,7 @@ export const AdminProductTags: React.FC<AdminProductTagsProps> = ({ tags = [] })
   const validTags = tags.map((t) => t.tags).filter(Boolean) as { id: string; name: string; slug: string }[]
 
   return (
-    <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-3 shadow-lg">
+    <section className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-3 shadow-lg">
       <h2 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
         <HugeiconsIcon icon={Tag01Icon} className="w-4 h-4" />
         <span>Assigned Discovery Tags ({validTags.length})</span>

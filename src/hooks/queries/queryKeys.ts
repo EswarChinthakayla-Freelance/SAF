@@ -73,7 +73,9 @@ export const queryKeys = {
     details: () => [...queryKeys.gallery.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.gallery.details(), id] as const,
     adminLists: () => [...queryKeys.gallery.all, 'admin-list'] as const,
-    adminList: () => [...queryKeys.gallery.all, 'admin-list'] as const,
+    adminList: (filters: Record<string, unknown> = {}) =>
+      [...queryKeys.gallery.adminLists(), normalizeQueryKeyFilters(filters)] as const,
+    adminDetail: (id: string) => [...queryKeys.gallery.all, 'admin-detail', id] as const,
   },
 
   inquiries: {

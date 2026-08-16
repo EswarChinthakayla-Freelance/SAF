@@ -45,8 +45,11 @@ export function useGalleryMutations() {
       }
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.gallery.all })
+      if (data?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.gallery.adminDetail(data.id) })
+      }
     },
     retry: false,
   })
@@ -65,7 +68,11 @@ export function useGalleryMutations() {
 
       // 2. Remove file from storage if path provided
       if (storagePath) {
-        await supabase.storage.from(STORAGE_BUCKETS.GALLERY_IMAGES).remove([storagePath])
+        try {
+          await supabase.storage.from(STORAGE_BUCKETS.GALLERY_IMAGES).remove([storagePath])
+        } catch (storageErr) {
+          console.warn('[deleteGalleryImage] Storage cleanup warning:', storageErr)
+        }
       }
 
       return id
@@ -109,9 +116,12 @@ export function useGalleryMutations() {
       }
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.gallery.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.metrics() })
+      if (data?.id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.gallery.adminDetail(data.id) })
+      }
     },
     retry: false,
   })

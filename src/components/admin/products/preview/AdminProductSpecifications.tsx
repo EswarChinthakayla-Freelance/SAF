@@ -34,7 +34,7 @@ export const AdminProductSpecifications: React.FC<AdminProductSpecificationsProp
     <div className="space-y-6">
       {/* Product Description */}
       {product.description && (
-        <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-3 shadow-lg">
+        <section className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-3 shadow-lg">
           <h2 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-2">
             <span>Description & Editorial Notes</span>
           </h2>
@@ -45,7 +45,7 @@ export const AdminProductSpecifications: React.FC<AdminProductSpecificationsProp
       )}
 
       {/* Structured Specifications Grid */}
-      <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 sm:p-6 space-y-5 shadow-lg">
+      <section className="bg-[#141414] border border-[#242424] rounded-none p-5 sm:p-6 space-y-5 shadow-lg">
         <h2 className="text-sm font-sans font-semibold uppercase tracking-wider text-[#C9A84C]">
           Technical Specifications & Craftsmanship
         </h2>

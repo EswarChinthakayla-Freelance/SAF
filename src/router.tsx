@@ -29,6 +29,7 @@ const AdminProductPreviewPage = lazy(() => import('@/pages/admin/AdminProductPre
 const AdminProductEditPage = lazy(() => import('@/pages/admin/AdminProductEditPage'))
 const AdminCollectionsPage = lazy(() => import('@/pages/admin/AdminCollectionsPage'))
 const AdminGalleryPage = lazy(() => import('@/pages/admin/AdminGalleryPage'))
+const AdminGalleryPreviewPage = lazy(() => import('@/pages/admin/AdminGalleryPreviewPage'))
 const AdminInquiriesPage = lazy(() => import('@/pages/admin/AdminInquiriesPage'))
 const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'))
 
@@ -251,6 +252,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper label="Loading Gallery Manager...">
             <AdminGalleryPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'gallery/:id/preview',
+        element: (
+          <SuspenseWrapper label="Loading Gallery Inspector...">
+            <AdminGalleryPreviewPage />
           </SuspenseWrapper>
         ),
       },
