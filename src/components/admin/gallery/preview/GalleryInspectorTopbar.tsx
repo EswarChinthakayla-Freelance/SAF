@@ -46,36 +46,39 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
   backHref = '/admin/gallery',
 }) => {
   return (
-    <header className="bg-[#111111] border-b border-[#242424] px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 shadow-md">
-      {/* Left: Back Button & Context */}
-      <div className="flex items-center gap-3 min-w-0">
+    <header className="bg-[#111111] border border-[#242424] px-4 sm:px-6 py-3 rounded-lg flex flex-wrap items-center justify-between gap-3 shadow-md">
+      {/* Left: Back Button & Index Counter */}
+      <div className="flex items-center gap-2.5 min-w-0">
         <Link
           to={backHref}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1A1A1A] hover:bg-[#242424] border border-[#2E2E2E] text-xs font-sans text-[#D1CCC2] hover:text-[#F5F0E8] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#C9A84C]"
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded bg-[#161616] hover:bg-[#202020] border border-[#2A2A2A] text-xs font-sans font-medium text-[#D1CCC2] hover:text-[#F5F0E8] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[#C9A84C]"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} className="w-3.5 h-3.5" />
           <span>Back to Gallery</span>
         </Link>
 
-        {/* Index counter */}
         {currentIndex !== undefined && totalImages !== undefined && totalImages > 0 && (
-          <span className="hidden sm:inline-flex text-xs font-mono text-[#8A847A]">
+          <span className="hidden sm:inline-flex items-center h-9 px-2.5 rounded text-xs font-mono text-[#8A847A] bg-[#141414] border border-[#242424]">
             Image {currentIndex + 1} of {totalImages}
           </span>
         )}
       </div>
 
-      {/* Center/Badges: Room & Visibility */}
+      {/* Center/Badges: Room Taxonomy & Interactive Visibility Status */}
       <div className="flex items-center gap-2">
-        <span className="px-2.5 py-0.5 rounded text-xs font-sans font-medium bg-[#1A1A1A] border border-[#2A2A2A] text-[#C9A84C]">
+        <span className="inline-flex items-center h-8 px-3 rounded text-xs font-sans font-medium bg-[#161616] border border-[#2A2A2A] text-[#C9A84C]">
           {image.room_type || 'Living Room'}
         </span>
 
-        <span
-          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-mono font-medium border ${
+        <button
+          type="button"
+          onClick={onToggleActive}
+          title={`Click to ${image.is_active ? 'hide from' : 'show in'} public gallery`}
+          aria-label={`Visibility: ${image.is_active ? 'Visible' : 'Hidden'}. Click to toggle`}
+          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded text-xs font-sans font-medium border transition-all cursor-pointer ${
             image.is_active
-              ? 'bg-[#0D1510] text-[#4ADE80] border-[#22C55E]/40'
-              : 'bg-[#181818] text-[#8A847A] border-[#2E2E2E]'
+              ? 'bg-[#0D1510] text-[#4ADE80] border-[#22C55E]/40 hover:bg-[#122018]'
+              : 'bg-[#181818] text-[#8A847A] border-[#2E2E2E] hover:text-[#F5F0E8]'
           }`}
         >
           <span
@@ -84,10 +87,10 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
             }`}
           />
           <span>{image.is_active ? 'Visible' : 'Hidden'}</span>
-        </span>
+        </button>
       </div>
 
-      {/* Right: Actions */}
+      {/* Right: Actions (Fullscreen, Edit Metadata, More Menu) */}
       <div className="flex items-center gap-2">
         {/* Fullscreen Button */}
         <Button
@@ -97,7 +100,7 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
           onClick={onToggleFullscreen}
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-          className="h-9 w-9 p-0 bg-[#171717] border-[#2E2E2E] text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#242424]"
+          className="h-9 w-9 p-0 bg-[#161616] border-[#2A2A2A] text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#202020] rounded"
         >
           <HugeiconsIcon icon={FullScreenIcon} className="w-4 h-4" />
         </Button>
@@ -117,7 +120,7 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label="More inspector actions"
-            className="h-9 w-9 p-0 inline-flex items-center justify-center bg-[#171717] border border-[#2E2E2E] text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#242424] rounded cursor-pointer transition-colors"
+            className="h-9 w-9 p-0 inline-flex items-center justify-center bg-[#161616] border border-[#2A2A2A] text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#202020] rounded cursor-pointer transition-colors"
           >
             <HugeiconsIcon icon={MoreVerticalIcon} className="w-4 h-4" />
           </DropdownMenuTrigger>
