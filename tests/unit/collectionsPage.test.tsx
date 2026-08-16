@@ -101,8 +101,8 @@ vi.mock('@/hooks/queries/useCollections', () => ({
 }))
 
 vi.mock('@/hooks/queries/useProducts', () => ({
-  useProducts: (filters: { collection?: string }) => {
-    if (filters.collection === 'dining-banquet') {
+  useProducts: (filters: { collection?: string; collectionSlug?: string } = {}) => {
+    if (filters.collectionSlug === 'dining-banquet' || filters.collection === 'dining-banquet') {
       return {
         data: { products: mockProducts, totalCount: 1, totalPages: 1 },
         isLoading: false,
@@ -140,16 +140,19 @@ describe('CollectionsPage and CollectionDetailPage Components', () => {
     vi.clearAllMocks()
   })
 
-  it('renders CollectionsPage with header, active collection cards, and links', () => {
+  it('renders CollectionsPage with header, active collection chapters, atlas index, and links', () => {
     renderWithRouter(<CollectionsPage />, '/collections')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Furniture for Every Space' })).toBeDefined()
-    expect(screen.getByText('Living Sanctuary')).toBeDefined()
-    expect(screen.getByText('Dining & Banquet')).toBeDefined()
-    expect(screen.getAllByText('Discover Collection').length).toBe(2)
+    expect(screen.getAllByText('Living Sanctuary').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText('Dining & Banquet').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Explore Living Sanctuary')).toBeDefined()
+    expect(screen.getByText('Explore Dining & Banquet')).toBeDefined()
+    expect(screen.getByText('02 Spatial Chapters')).toBeDefined()
+    expect(screen.getByText('Explore every piece in our catalogue.')).toBeDefined()
   })
 
-  it('renders CollectionDetailPage with cover hero, description, and filtered ProductGrid', () => {
+  it('renders CollectionDetailPage with cover stage, dossier, and SinglePieceFeature for 1-product collection', () => {
     renderWithRouter(
       <Routes>
         <Route path="/collections/:slug" element={<CollectionDetailPage />} />
@@ -158,9 +161,11 @@ describe('CollectionsPage and CollectionDetailPage Components', () => {
     )
 
     expect(screen.getByRole('heading', { level: 1, name: 'Dining & Banquet' })).toBeDefined()
-    expect(screen.getByText('Generational solid hardwood dining tables and chairs.')).toBeDefined()
+    expect(screen.getAllByText('Generational solid hardwood dining tables and chairs.').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Teak Grand Dining Table')).toBeDefined()
     expect(screen.getByText('₹85,000')).toBeDefined()
+    expect(screen.getByText('Explore the Pieces')).toBeDefined()
+    expect(screen.getByText('Explore Piece Details')).toBeDefined()
   })
 
   it('renders empty state when collection has no published products', () => {
@@ -171,8 +176,8 @@ describe('CollectionsPage and CollectionDetailPage Components', () => {
       '/collections/empty-collection'
     )
 
-    expect(screen.getByText('No pieces are currently available in this collection.')).toBeDefined()
-    expect(screen.getByText('Browse All Furniture')).toBeDefined()
+    expect(screen.getByText('No pieces are currently published in this collection.')).toBeDefined()
+    expect(screen.getByText('Browse Full Catalogue')).toBeDefined()
   })
 
   it('renders not found state when collection slug does not exist', () => {

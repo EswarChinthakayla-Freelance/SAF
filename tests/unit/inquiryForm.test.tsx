@@ -26,7 +26,7 @@ describe('InquiryForm Component', () => {
     expect(screen.getByLabelText(/Email Address/i)).toBeDefined()
     expect(screen.getByLabelText(/Phone \/ WhatsApp/i)).toBeDefined()
     expect(screen.getByLabelText(/Inquiry Subject/i)).toBeDefined()
-    expect(screen.getByLabelText(/Requirements & Dimensions/i)).toBeDefined()
+    expect(screen.getByLabelText(/Requirements/i)).toBeDefined()
     expect(screen.getByText('0/40 min characters')).toBeDefined()
   })
 
@@ -36,7 +36,7 @@ describe('InquiryForm Component', () => {
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Ramesh Varma' } })
     fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: 'ramesh@example.com' } })
-    fireEvent.change(screen.getByLabelText(/Requirements & Dimensions/i), {
+    fireEvent.change(screen.getByLabelText(/Requirements/i), {
       target: { value: 'Short message' },
     })
 
@@ -57,7 +57,7 @@ describe('InquiryForm Component', () => {
 
     fireEvent.change(screen.getByLabelText(/Full Name/i), { target: { value: 'Ramesh Varma' } })
     fireEvent.change(screen.getByLabelText(/Email Address/i), { target: { value: 'ramesh@example.com' } })
-    fireEvent.change(screen.getByLabelText(/Requirements & Dimensions/i), {
+    fireEvent.change(screen.getByLabelText(/Requirements/i), {
       target: {
         value: 'I would like a custom 8-seater Burma teak dining table with brass accents and matching chairs.',
       },
@@ -84,7 +84,7 @@ describe('InquiryForm Component', () => {
 
     const nameInput = screen.getByLabelText(/Full Name/i) as HTMLInputElement
     const emailInput = screen.getByLabelText(/Email Address/i) as HTMLInputElement
-    const messageInput = screen.getByLabelText(/Requirements & Dimensions/i) as HTMLTextAreaElement
+    const messageInput = screen.getByLabelText(/Requirements/i) as HTMLTextAreaElement
 
     fireEvent.change(nameInput, { target: { value: 'Venkatesh Rao' } })
     fireEvent.change(emailInput, { target: { value: 'venkat@example.com' } })
@@ -116,7 +116,8 @@ describe('InquiryForm Component', () => {
       />
     )
 
-    expect(screen.getByText(/Request Quote for Burma Teak Bed/i)).toBeDefined()
+    expect(screen.getByText('ENQUIRING ABOUT SPECIFIC PIECE')).toBeDefined()
+    expect(screen.getByText('Burma Teak Bed')).toBeDefined()
     const submitBtn = screen.getByRole('button', { name: /Request Bespoke Quote/i })
     expect(submitBtn).toBeDefined()
   })

@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { PageHeader } from '@/components/common/PageHeader'
 import { PageMeta } from '@/components/seo/PageMeta'
-import { RoomFilter } from '@/components/features/gallery/RoomFilter'
+import { PublicGalleryHero } from '@/components/features/gallery/PublicGalleryHero'
+import { GalleryFilterRail } from '@/components/features/gallery/GalleryFilterRail'
 import { GalleryGrid } from '@/components/features/gallery/GalleryGrid'
-import { LightboxModal } from '@/components/features/gallery/LightboxModal'
 import { GoldButton } from '@/components/brand/GoldButton'
 import { useGallery } from '@/hooks/queries/useGallery'
 import { GALLERY_ROOM_FILTERS, type GalleryRoomSlug } from '@/lib/constants'
@@ -38,28 +37,9 @@ export const GalleryPage: React.FC = () => {
     return data.pages.flatMap((page) => page.images)
   }, [data])
 
-  // Lightbox state & Focus return management
-  const [selectedLightboxIndex, setSelectedLightboxIndex] = useState<number | null>(null)
-  const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
-  const lastOpenedIndexRef = useRef<number | null>(null)
+  const totalCount = data?.pages?.[0]?.totalCount ?? allImages.length
+
   const sentinelRef = useRef<HTMLDivElement>(null)
-
-  // Track opened index for focus restoration
-  const handleSelectImage = (index: number) => {
-    lastOpenedIndexRef.current = index
-    setSelectedLightboxIndex(index)
-  }
-
-  // Restore focus to the originating tile when Lightbox closes
-  const handleCloseLightbox = () => {
-    setSelectedLightboxIndex(null)
-    const restoreIdx = lastOpenedIndexRef.current
-    if (restoreIdx !== null && itemRefs.current[restoreIdx]) {
-      setTimeout(() => {
-        itemRefs.current[restoreIdx]?.focus()
-      }, 50)
-    }
-  }
 
   // Room Filter Change handler
   const handleSelectRoom = (roomSlug: GalleryRoomSlug) => {
@@ -88,7 +68,7 @@ export const GalleryPage: React.FC = () => {
           handleFetchNextPage()
         }
       },
-      { rootMargin: '300px 0px' }
+      { rootMargin: '400px 0px' }
     )
 
     observer.observe(sentinel)
@@ -100,30 +80,24 @@ export const GalleryPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pt-24 sm:pt-28 pb-24">
       <PageMeta
-        title="Furniture Inspiration Gallery | Sri Anjaneya Furnitures"
+        title="Spaces, Styled. — Inspiration Gallery | Sri Anjaneya Furnitures"
         description="Explore curated interior spaces and architectural residences featuring bespoke handcrafted solid wood furniture by Sri Anjaneya Furnitures."
         canonicalUrl="/gallery"
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-12">
-        {/* PageHeader Introduction */}
-        <PageHeader
-          breadcrumbs={[
-            { label: 'Home', href: '/' },
-            { label: 'Gallery', isCurrent: true },
-          ]}
-          eyebrow="INSPIRATION"
-          title="Spaces, Styled."
-          description="Discover real-world architectural settings, room layouts, and refined living environments elevated by bespoke solid woodcraft."
-          className="text-center"
+        {/* 1. Editorial Public Gallery Hero */}
+        <PublicGalleryHero
+          totalCount={totalCount}
+          activeRoomLabel={activeRoomLabel}
         />
 
-        {/* Room Filter Segmented Controls */}
-        <div className="flex justify-center pt-2">
-          <RoomFilter activeRoom={activeRoomSlug} onSelectRoom={handleSelectRoom} />
+        {/* 2. Room Filter Rail */}
+        <div className="pt-1">
+          <GalleryFilterRail activeRoom={activeRoomSlug} onSelectRoom={handleSelectRoom} />
         </div>
 
-        {/* Initial Error State */}
+        {/* 3. Initial Error State */}
         {isError ? (
           <div className="py-20 text-center max-w-md mx-auto space-y-4 bg-[#111111] border border-[#2A2A2A] p-8 rounded-none">
             <div className="w-12 h-12 rounded-full bg-red-950/40 border border-red-800/40 flex items-center justify-center mx-auto text-red-400">
@@ -149,8 +123,8 @@ export const GalleryPage: React.FC = () => {
             </div>
           </div>
         ) : allImages.length === 0 && !isLoading ? (
-          /* Empty Room Filter State */
-          <div className="py-20 text-center max-w-md mx-auto space-y-4">
+          /* 4. Refined Empty Room Filter State */
+          <div className="py-20 text-center max-w-md mx-auto space-y-4 bg-[#0E0E0E] border border-[#222222] p-8">
             <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#C9A84C] font-semibold">
               Curated Spaces
             </span>
@@ -160,25 +134,29 @@ export const GalleryPage: React.FC = () => {
             <p className="text-xs text-[#9B958B] leading-relaxed font-sans font-light">
               We are regularly photographing new residences and interior commissions in {activeRoomLabel}.
             </p>
-            <div className="pt-3">
+            <div className="pt-3 flex flex-wrap justify-center gap-3">
               <GoldButton onClick={() => handleSelectRoom('all')} size="sm">
                 View All Spaces
               </GoldButton>
+              <Link to="/products">
+                <GoldButton variant="outline" size="sm">
+                  Browse Creations
+                </GoldButton>
+              </Link>
             </div>
           </div>
         ) : (
-          /* Responsive Editorial Gallery Grid */
+          /* 5. Responsive Curated Gallery Grid */
           <div className="space-y-12">
             <GalleryGrid
               images={allImages}
               isLoading={isLoading}
-              onSelectImage={handleSelectImage}
-              itemRefs={itemRefs}
+              roomSlug={activeRoomSlug}
             />
 
             {/* Next-Page Loading & Failure Handlers */}
             <div className="flex flex-col items-center justify-center pt-4 space-y-4">
-              {/* Localized Next-Page Error Recovery (keeps already loaded images) */}
+              {/* Localized Next-Page Error Recovery */}
               {isFetchNextPageError && (
                 <div className="p-4 rounded-none bg-[#1A1816] border border-red-900/40 text-center space-y-2">
                   <p className="text-xs text-red-400 font-mono">Unable to load more images.</p>
@@ -196,7 +174,7 @@ export const GalleryPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Manual Load More fallback when hasNextPage is true */}
+              {/* Manual Load More fallback */}
               {hasNextPage && !isFetchingNextPage && !isFetchNextPageError && (
                 <GoldButton
                   variant="outline"
@@ -210,9 +188,14 @@ export const GalleryPage: React.FC = () => {
 
               {/* End of Gallery Indicator */}
               {!hasNextPage && allImages.length > 0 && !isLoading && (
-                <span className="text-[11px] font-mono text-[#555047] uppercase tracking-[0.2em] pt-6">
-                  End of Inspiration Gallery
-                </span>
+                <div className="text-center pt-6 space-y-2">
+                  <span className="text-[11px] font-mono text-[#555047] uppercase tracking-[0.2em] block">
+                    End of Inspiration Archive
+                  </span>
+                  <p className="text-xs text-[#7A746B] font-sans">
+                    Have a bespoke residential project in mind?
+                  </p>
+                </div>
               )}
             </div>
 
@@ -220,15 +203,38 @@ export const GalleryPage: React.FC = () => {
             <div ref={sentinelRef} className="h-10 w-full pointer-events-none" aria-hidden="true" />
           </div>
         )}
-      </div>
 
-      {/* Accessible Dialog Lightbox Modal */}
-      <LightboxModal
-        images={allImages}
-        selectedIndex={selectedLightboxIndex}
-        onClose={handleCloseLightbox}
-        onSelectIndex={setSelectedLightboxIndex}
-      />
+        {/* 6. Closing Spatial Commission Exploration CTA */}
+        <section
+          aria-label="Bespoke Spatial Commission Call to Action"
+          className="mt-16 p-8 sm:p-12 bg-gradient-to-br from-[#121212] via-[#0E0E0E] to-[#0A0A0A] border border-[#2A2A2A] flex flex-col md:flex-row items-center justify-between gap-6"
+        >
+          <div className="space-y-2 text-center md:text-left max-w-xl">
+            <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#C9A84C] font-semibold">
+              BESPOKE ARCHITECTURAL CRAFT
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#F5F0E8]">
+              Envisioning a Custom Spatial Suite?
+            </h2>
+            <p className="text-xs sm:text-sm text-[#9B958B] font-sans font-light">
+              Collaborate directly with our master artisans to sculpt bespoke teak, rosewood, or walnut furniture tailored to your residence.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 shrink-0">
+            <Link to="/contact">
+              <GoldButton size="lg" className="text-xs tracking-wider uppercase font-semibold">
+                Request Consultation
+              </GoldButton>
+            </Link>
+            <Link to="/products">
+              <GoldButton variant="outline" size="lg" className="text-xs tracking-wider uppercase">
+                Explore Creations
+              </GoldButton>
+            </Link>
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

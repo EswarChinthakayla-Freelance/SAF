@@ -8,7 +8,16 @@ import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Cancel01Icon, CheckmarkCircle02Icon, InformationCircleIcon, Alert02Icon, MultiplicationSignCircleIcon, Loading03Icon } from "@hugeicons/core-free-icons"
 
-const toast = ToastPrimitive.createToastManager()
+const baseToast = ToastPrimitive.createToastManager()
+
+const toast = Object.assign(baseToast, {
+  success: (title: string, description?: string) =>
+    baseToast.add({ title, description, type: 'success' }),
+  error: (title: string, description?: string) =>
+    baseToast.add({ title, description, type: 'error' }),
+  info: (title: string, description?: string) =>
+    baseToast.add({ title, description, type: 'info' }),
+})
 
 function ToastProvider({ ...props }: ToastPrimitive.Provider.Props) {
   return <ToastPrimitive.Provider {...props} />

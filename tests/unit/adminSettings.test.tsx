@@ -11,11 +11,11 @@ const mockSettings: SiteSettingsRow = {
   brand_name: 'Sri Anjaneya Furnitures',
   tagline: 'Bespoke Solid Wood Craftsmanship',
   logo_path: null,
-  email: 'concierge@srianjaneyafurnitures.com',
-  phone: '+91 98765 43210',
+  email: 'srianjaneyafurniturestallur@gmail.com',
+  phone: '+91 7337299661',
   address: 'No. 42 Artisans Avenue, Woodcraft District, Bengaluru, Karnataka 560001',
   instagram_url: 'https://instagram.com/srianjaneyafurnitures',
-  whatsapp_number: '+919876543210',
+  whatsapp_number: '+917337299661',
   hero_heading: 'Heirloom Furniture',
   hero_subtext: 'Crafted from seasoned solid woods.',
   showroom_hours: {
@@ -96,8 +96,8 @@ describe('AdminSettingsPage Component', () => {
     fireEvent.click(contactBtn)
 
     expect(screen.getByText('Contact Channels')).toBeDefined()
-    expect(screen.getByDisplayValue('concierge@srianjaneyafurnitures.com')).toBeDefined()
-    expect(screen.getByDisplayValue('+91 98765 43210')).toBeDefined()
+    expect(screen.getByDisplayValue('srianjaneyafurniturestallur@gmail.com')).toBeDefined()
+    expect(screen.getByDisplayValue('+91 7337299661')).toBeDefined()
   })
 
   it('renders structured showroom hours in showroom category', async () => {

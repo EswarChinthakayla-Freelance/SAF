@@ -1,16 +1,35 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getMediaUrl } from '@/lib/media'
+import { getCollectionFallbackImage } from '@/lib/collectionFallback'
 import type { CollectionRow } from '@/types/app'
 
 export interface CollectionCardProps {
   collection: CollectionRow
+  index?: number
   className?: string
 }
 
-export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, className = '' }) => {
-  const [imageError, setImageError] = useState(false)
-  const imageUrl = getMediaUrl('brand-assets', collection.cover_image_path, 'card')
+export const CollectionCard: React.FC<CollectionCardProps> = ({
+  collection,
+  index = 0,
+  className = '',
+}) => {
+  const fallbackImage = getCollectionFallbackImage(collection.slug, collection.name, index)
+  const initialUrl = collection.cover_image_path
+    ? getMediaUrl('brand-assets', collection.cover_image_path, 'card') || fallbackImage
+    : fallbackImage
+
+  const [currentSrc, setCurrentSrc] = useState<string>(initialUrl)
+  const [hasFallbackLoaded, setHasFallbackLoaded] = useState(false)
+
+  const handleImageError = () => {
+    if (currentSrc !== fallbackImage) {
+      setCurrentSrc(fallbackImage)
+    } else {
+      setHasFallbackLoaded(true)
+    }
+  }
 
   return (
     <Link
@@ -20,12 +39,12 @@ export const CollectionCard: React.FC<CollectionCardProps> = ({ collection, clas
     >
       {/* Cover Image Presentation */}
       <div className="aspect-[16/10] sm:aspect-[16/11] bg-[#0E0D0B] overflow-hidden relative">
-        {!imageError && collection.cover_image_path ? (
+        {!hasFallbackLoaded ? (
           <img
-            src={imageUrl}
+            src={currentSrc}
             alt={collection.cover_image_alt || `${collection.name} Collection`}
             loading="lazy"
-            onError={() => setImageError(true)}
+            onError={handleImageError}
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 opacity-90 group-hover:opacity-100"
           />
         ) : (

@@ -155,7 +155,14 @@ export const galleryImageSchema = z.object({
 
 export type GalleryImageFormValues = z.infer<typeof galleryImageSchema>
 
-// 5. Admin Login Schema
+// 5. Admin Login Schemas
+export const adminLoginSchema = z.object({
+  email: z.string().trim().email('Enter a valid email address.'),
+  password: z.string().min(1, 'Enter your password.'),
+})
+
+export type AdminLoginFormValues = z.infer<typeof adminLoginSchema>
+
 export const loginSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),

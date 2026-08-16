@@ -431,7 +431,7 @@ export const AdminSettingsPage: React.FC = () => {
                       type="email"
                       value={formData.email || ''}
                       onChange={(e) => handleFieldChange('email', e.target.value)}
-                      placeholder="concierge@srianjaneyafurnitures.com"
+                      placeholder="srianjaneyafurniturestallur@gmail.com"
                       className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-4 py-3 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
                     />
                   </div>
@@ -444,7 +444,7 @@ export const AdminSettingsPage: React.FC = () => {
                       type="tel"
                       value={formData.phone || ''}
                       onChange={(e) => handleFieldChange('phone', e.target.value)}
-                      placeholder="+91 98765 43210"
+                      placeholder="+91 7337299661"
                       className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-4 py-3 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
                     />
                   </div>
@@ -458,7 +458,7 @@ export const AdminSettingsPage: React.FC = () => {
                     type="text"
                     value={formData.whatsapp_number || ''}
                     onChange={(e) => handleFieldChange('whatsapp_number', e.target.value)}
-                    placeholder="+919876543210"
+                    placeholder="+917337299661"
                     className="w-full bg-[#0A0A0A] border border-[#2A2A2A] rounded-none px-4 py-3 text-xs text-[#F5F0E8] focus:border-[#C9A84C] outline-none"
                   />
                 </div>

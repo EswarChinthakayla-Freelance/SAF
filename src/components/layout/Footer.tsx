@@ -85,9 +85,9 @@ export const Footer: React.FC = () => {
             </h4>
             <div className="space-y-2 leading-relaxed font-sans">
               <p className="text-[#F5F0E8] font-medium">
-                {settings?.email || 'srianjaneyafurnitures@gmail.com'}
+                {settings?.email || 'srianjaneyafurniturestallur@gmail.com'}
               </p>
-              {settings?.phone && <p className="text-[#D1CCC2]">{settings.phone}</p>}
+              <p className="text-[#D1CCC2]">{settings?.phone || '+91 7337299661'}</p>
               {settings?.address && <p className="text-[#7A746B] text-[11px]">{settings.address}</p>}
             </div>
           </div>

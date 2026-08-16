@@ -63,9 +63,14 @@ export const queryKeys = {
 
   gallery: {
     all: ['gallery'] as const,
+    infiniteLists: () => [...queryKeys.gallery.all, 'infinite-list'] as const,
+    infiniteList: (roomType = 'all') =>
+      [...queryKeys.gallery.infiniteLists(), { roomType }] as const,
     lists: () => [...queryKeys.gallery.all, 'list'] as const,
     list: (roomType = 'all') =>
       [...queryKeys.gallery.lists(), { roomType }] as const,
+    details: () => [...queryKeys.gallery.all, 'detail'] as const,
+    detail: (id: string) => [...queryKeys.gallery.details(), id] as const,
     adminLists: () => [...queryKeys.gallery.all, 'admin-list'] as const,
     adminList: () => [...queryKeys.gallery.all, 'admin-list'] as const,
   },

@@ -6,7 +6,7 @@ import {
   type AdminProductFormValues,
 } from '@/components/admin/product-form/AdminProductForm'
 import { useCollections } from '@/hooks/queries/useCollections'
-import { useTags } from '@/hooks/queries/useTags'
+import { useTags, findOrCreateTag } from '@/hooks/queries/useTags'
 import { useProductMutations } from '@/hooks/mutations/useProductMutations'
 import { supabase } from '@/lib/supabase'
 import type { TagRow, ProductImageRow } from '@/types/app'
@@ -98,17 +98,7 @@ export const AdminProductNewPage: React.FC = () => {
   }
 
   const handleCreateTag = async (name: string): Promise<TagRow> => {
-    const slug = name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-')
-    const { data, error } = await supabase
-      .from('tags')
-      .insert({ name: name.trim(), slug })
-      .select()
-      .single()
-
-    if (error || !data) {
-      throw new Error(error?.message || 'Failed to create tag.')
-    }
-    return data as TagRow
+    return findOrCreateTag(name)
   }
 
   const handleSave = async (values: AdminProductFormValues) => {

@@ -3,10 +3,11 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ProductPlate } from '@/components/features/products/ProductPlate'
 import { ProductCard } from '@/components/features/products/ProductCard'
 import { ProductGrid } from '@/components/features/products/ProductGrid'
-import { ProductsToolbar } from '@/components/features/products/ProductsToolbar'
-import { ActiveProductFilters } from '@/components/features/products/ActiveProductFilters'
+import { CatalogueCommandBar } from '@/components/features/products/CatalogueCommandBar'
+import { ActiveFilterRail } from '@/components/features/products/ActiveFilterRail'
 import { ProductPagination } from '@/components/features/products/ProductPagination'
 import type { ProductListItem } from '@/types/app'
 
@@ -54,43 +55,54 @@ const mockProduct: ProductListItem = {
   },
 }
 
-describe('Products Catalogue Components', () => {
-  it('renders ProductCard with title, collection name, formatted price, and link', () => {
-    renderWithProviders(<ProductCard product={mockProduct} />)
+describe('The Furniture Index — Products Catalogue Components', () => {
+  it('renders ProductPlate and ProductCard with plate numbering, collection, and price', () => {
+    const { unmount } = renderWithProviders(<ProductPlate product={mockProduct} index={0} />)
 
     expect(screen.getByText('Aurelia Solid Teak Lounge Chair')).toBeDefined()
-    expect(screen.getByText('Living Room')).toBeDefined()
+    expect(screen.getByText('PLATE 001')).toBeDefined()
+    expect(screen.getAllByText('Living Room').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('₹48,000')).toBeDefined()
     expect(screen.getByText('₹55,000')).toBeDefined()
     expect(screen.getByText(/View Piece/i)).toBeDefined()
+    unmount()
+
+    // Test ProductCard wrapper
+    renderWithProviders(<ProductCard product={mockProduct} index={1} />)
+    expect(screen.getByText('PLATE 002')).toBeDefined()
   })
 
-  it('renders ProductsToolbar with piece count and sort selector', () => {
+  it('renders CatalogueCommandBar with piece count, search input, and filter toggle', () => {
     const handleSortChange = vi.fn()
-    const handleOpenFilters = vi.fn()
+    const handleToggleAtelier = vi.fn()
+    const handleOpenMobile = vi.fn()
 
     renderWithProviders(
-      <ProductsToolbar
+      <CatalogueCommandBar
         totalCount={24}
         sort="curated"
         onSortChange={handleSortChange}
-        onOpenMobileFilters={handleOpenFilters}
+        isFilterAtelierOpen={false}
+        onToggleFilterAtelier={handleToggleAtelier}
+        onOpenMobileFilters={handleOpenMobile}
         activeFilterCount={2}
+        searchQuery=""
       />
     )
 
     expect(screen.getByText('24')).toBeDefined()
-    expect(screen.getByText(/pieces available/i)).toBeDefined()
-    expect(screen.getByLabelText(/Open filter options/i)).toBeDefined()
+    expect(screen.getByText(/Pieces Available/i)).toBeDefined()
+    expect(screen.getByRole('button', { name: /Toggle catalogue filters panel/i })).toBeDefined()
+    expect(screen.getByPlaceholderText(/Search furniture/i)).toBeDefined()
   })
 
-  it('renders ActiveProductFilters with removable filter chips and clear all button', () => {
+  it('renders ActiveFilterRail with removable filter chips and clear all button', () => {
     const handleRemoveCollection = vi.fn()
     const handleRemoveTag = vi.fn()
     const handleClearAll = vi.fn()
 
     renderWithProviders(
-      <ActiveProductFilters
+      <ActiveFilterRail
         filters={{ collection: 'living-room', tags: ['teak'] }}
         collections={[{ id: 'col-1', name: 'Living Room', slug: 'living-room', description: null, cover_image_path: null, cover_image_alt: null, sort_order: 1, is_active: true, created_at: '', updated_at: '' }]}
         tags={[{ id: 't-1', name: 'Solid Teak', slug: 'teak' }]}
@@ -103,10 +115,10 @@ describe('Products Catalogue Components', () => {
       />
     )
 
-    expect(screen.getByText('Room: Living Room')).toBeDefined()
+    expect(screen.getByText('Living Room')).toBeDefined()
     expect(screen.getByText('Solid Teak')).toBeDefined()
 
-    const clearAllButton = screen.getByText('Clear all')
+    const clearAllButton = screen.getByText('Clear All')
     fireEvent.click(clearAllButton)
     expect(handleClearAll).toHaveBeenCalledTimes(1)
   })
@@ -122,7 +134,7 @@ describe('Products Catalogue Components', () => {
       />
     )
 
-    expect(screen.getByText('No pieces match these filters.')).toBeDefined()
+    expect(screen.getByText('No pieces match this selection.')).toBeDefined()
     const clearButton = screen.getByText('Clear Filters')
     fireEvent.click(clearButton)
     expect(handleClear).toHaveBeenCalledTimes(1)
@@ -139,11 +151,11 @@ describe('Products Catalogue Components', () => {
       />
     )
 
-    const prevButton = screen.getByLabelText('Previous Page')
+    const prevButton = screen.getByRole('button', { name: /previous/i })
     fireEvent.click(prevButton)
     expect(handlePageChange).toHaveBeenCalledWith(1)
 
-    const nextButton = screen.getByLabelText('Next Page')
+    const nextButton = screen.getByRole('button', { name: /next/i })
     fireEvent.click(nextButton)
     expect(handlePageChange).toHaveBeenCalledWith(3)
   })

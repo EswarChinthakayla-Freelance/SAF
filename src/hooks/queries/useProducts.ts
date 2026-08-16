@@ -135,9 +135,14 @@ export function useProducts(filters: ProductListFilters = {}) {
     ? filters.tags
     : filters.tagSlug ? [filters.tagSlug] : []
 
+  // Normalize collection slug from collectionSlug or collection alias
+  const collectionSlug = (filters.collectionSlug || filters.collection) as string | undefined
+
   return useQuery<PaginatedProductsResult, Error>({
     queryKey: queryKeys.products.list({
       ...filters,
+      collectionSlug: collectionSlug || undefined,
+      collection: undefined,
       page,
       pageSize,
       sort: normalizedSortKey,
@@ -152,7 +157,7 @@ export function useProducts(filters: ProductListFilters = {}) {
       // Build dynamic select string based on whether inner joins are required for relational filtering
       let selectFields = PRODUCT_LIST_PROJECTION
 
-      if (filters.collectionSlug) {
+      if (collectionSlug) {
         selectFields = `
           id,
           name,
@@ -210,8 +215,8 @@ export function useProducts(filters: ProductListFilters = {}) {
       // Filter by Collection ID or Slug
       if (filters.collectionId) {
         query = query.eq('collection_id', filters.collectionId)
-      } else if (filters.collectionSlug) {
-        query = query.eq('collections.slug', filters.collectionSlug)
+      } else if (collectionSlug) {
+        query = query.eq('collections.slug', collectionSlug)
       }
 
       // Filter by Tag Slugs
@@ -268,13 +273,13 @@ export function useProducts(filters: ProductListFilters = {}) {
 
 /**
  * Public featured products query for homepage.
- * Queries authoritative homepage_featured_products relation first.
+ * Strictly queries authoritative homepage_featured_products relation.
+ * If no relations exist, returns an empty array to allow graceful section omission.
  */
 export function useFeaturedProducts(limit = PAGINATION.FEATURED_PRODUCTS_LIMIT) {
   return useQuery<ProductListItem[], Error>({
     queryKey: queryKeys.products.featured(),
     queryFn: async ({ signal }) => {
-      // 1. Query authoritative homepage_featured_products relation
       let featQuery = supabase
         .from('homepage_featured_products')
         .select(`
@@ -293,29 +298,34 @@ export function useFeaturedProducts(limit = PAGINATION.FEATURED_PRODUCTS_LIMIT) 
 
       const { data: featData, error: featError } = await featQuery
 
-      if (!featError && featData && featData.length > 0) {
-        return featData.map((row) => (row as unknown as { products: ProductListItem }).products)
+      if (featError) {
+        throw normalizeError(featError)
       }
 
-      // 2. Fallback to top published products if no specific featured relation exists
-      let fallbackQuery = supabase
-        .from('products')
-        .select(PRODUCT_LIST_PROJECTION)
-        .eq('is_published', true)
-        .order('sort_order', { ascending: true })
-        .limit(limit)
+      if (!featData || featData.length === 0) {
+        // Fallback: If admin has not yet curated featured products,
+        // display top published products so the exhibition stage always displays.
+        let fallbackQuery = supabase
+          .from('products')
+          .select(PRODUCT_LIST_PROJECTION)
+          .eq('is_published', true)
+          .order('sort_order', { ascending: true })
+          .limit(limit)
 
-      if (signal) {
-        fallbackQuery = fallbackQuery.abortSignal(signal)
+        if (signal) {
+          fallbackQuery = fallbackQuery.abortSignal(signal)
+        }
+
+        const { data: fallbackData, error: fallbackError } = await fallbackQuery
+
+        if (fallbackError) {
+          throw normalizeError(fallbackError)
+        }
+
+        return (fallbackData as unknown as ProductListItem[]) || []
       }
 
-      const { data, error } = await fallbackQuery
-
-      if (error) {
-        throw normalizeError(error)
-      }
-
-      return (data as unknown as ProductListItem[]) || []
+      return featData.map((row) => (row as unknown as { products: ProductListItem }).products)
     },
     staleTime: CACHE_TIMES.PUBLIC_STALE_MS,
   })

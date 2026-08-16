@@ -30,7 +30,11 @@ export const TagsSection: React.FC<TagsSectionProps> = ({
 
     try {
       const created = await onCreateTag(trimmed)
-      onChange([...selectedTagIds, created.id])
+      if (created && created.id) {
+        if (!selectedTagIds.includes(created.id)) {
+          onChange([...selectedTagIds, created.id])
+        }
+      }
       setTagInput('')
     } catch (err) {
       console.error('Failed to create tag:', err)

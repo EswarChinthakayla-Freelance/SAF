@@ -123,4 +123,35 @@ describe('Zod Validators', () => {
     }
     expect(productSchema.safeParse(invalidVariantProduct).success).toBe(false)
   })
+
+  it('validates adminLoginSchema email format and required password', async () => {
+    const { adminLoginSchema } = await import('@/lib/validators')
+
+    // Valid admin payload
+    const valid = adminLoginSchema.safeParse({
+      email: 'admin@srianjaneyafurnitures.com',
+      password: 'secret-password-123',
+    })
+    expect(valid.success).toBe(true)
+
+    // Invalid email
+    const invalidEmail = adminLoginSchema.safeParse({
+      email: 'invalid-email-address',
+      password: 'password',
+    })
+    expect(invalidEmail.success).toBe(false)
+    if (!invalidEmail.success) {
+      expect(invalidEmail.error.issues[0].message).toBe('Enter a valid email address.')
+    }
+
+    // Empty password
+    const emptyPassword = adminLoginSchema.safeParse({
+      email: 'admin@srianjaneyafurnitures.com',
+      password: '',
+    })
+    expect(emptyPassword.success).toBe(false)
+    if (!emptyPassword.success) {
+      expect(emptyPassword.error.issues[0].message).toBe('Enter your password.')
+    }
+  })
 })

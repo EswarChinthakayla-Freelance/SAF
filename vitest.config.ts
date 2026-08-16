@@ -11,11 +11,9 @@ export default defineConfig({
     include: ['tests/{unit,integration,security}/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'node_modules/**'],
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
+    fileParallelism: false,
+    maxWorkers: 1,
+    minWorkers: 1,
     env: {
       VITE_SUPABASE_URL: 'https://mock-project.supabase.co',
       VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-anon-key',

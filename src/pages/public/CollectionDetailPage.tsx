@@ -1,24 +1,31 @@
 import React, { useRef } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion'
 import { PageMeta } from '@/components/seo/PageMeta'
-import { AppBreadcrumb } from '@/components/common/AppBreadcrumb'
-import { ProductGrid } from '@/components/features/products/ProductGrid'
-import { ProductPagination } from '@/components/features/products/ProductPagination'
+import { CollectionCoverStage } from '@/components/features/collections/CollectionCoverStage'
+import { CollectionDossier } from '@/components/features/collections/CollectionDossier'
+import { CollectionProductExhibition } from '@/components/features/collections/CollectionProductExhibition'
+import { NextCollectionChapter } from '@/components/features/collections/NextCollectionChapter'
+import { CollectionDetailSkeleton } from '@/components/features/collections/CollectionDetailSkeleton'
 import { GoldButton } from '@/components/brand/GoldButton'
-import { useCollection } from '@/hooks/queries/useCollections'
+import { useCollection, useCollections } from '@/hooks/queries/useCollections'
 import { useProducts } from '@/hooks/queries/useProducts'
-import { getMediaUrl } from '@/lib/media'
+import type { SortOption } from '@/lib/constants'
 
+/**
+ * CollectionDetailPage
+ * "The Collection Monograph" — Public Collection Overview / Monograph Route.
+ * Features an asymmetric Cover Stage, editorial Dossier, adaptive Single/Multi-Piece Exhibition,
+ * and Next Collection chapter bridge.
+ */
 export const CollectionDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+  const sort = (searchParams.get('sort') as SortOption) || 'curated'
 
-  const heroRef = useRef<HTMLDivElement>(null)
-  const shouldReduceMotion = useReducedMotion()
+  const exhibitionRef = useRef<HTMLDivElement>(null)
 
-  // 1. Fetch collection metadata by slug
+  // 1. Fetch current collection
   const {
     data: collection,
     isLoading: isCollectionLoading,
@@ -27,7 +34,10 @@ export const CollectionDetailPage: React.FC = () => {
     refetch: refetchCollection,
   } = useCollection(slug)
 
-  // 2. Fetch products bounded to this collection
+  // 2. Fetch all active collections to find adjacent next collection
+  const { data: allCollections = [] } = useCollections({ activeOnly: true })
+
+  // 3. Fetch products bounded to this collection
   const {
     data: productsData,
     isLoading: isProductsLoading,
@@ -35,52 +45,50 @@ export const CollectionDetailPage: React.FC = () => {
     error: productsError,
     refetch: refetchProducts,
   } = useProducts({
-    collection: slug,
+    collectionSlug: slug,
+    sort,
     page,
+    enabled: Boolean(slug && collection),
   })
 
-  // Scroll parallax calculation for hero image
-  const { scrollY } = useScroll()
-  const heroY = useTransform(scrollY, [0, 500], ['0%', '12%'])
-  const heroScale = useTransform(scrollY, [0, 500], [1, 1.04])
+  // Scroll smoothly to exhibition section
+  const handleExplorePieces = () => {
+    const el = document.getElementById('collection-pieces')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  // Update URL search parameters
+  const handleSortChange = (newSort: SortOption) => {
+    const next = new URLSearchParams(searchParams)
+    next.set('sort', newSort)
+    next.delete('page')
+    setSearchParams(next)
+  }
 
   const handlePageChange = (newPage: number) => {
-    const nextParams = new URLSearchParams(searchParams)
+    const next = new URLSearchParams(searchParams)
     if (newPage > 1) {
-      nextParams.set('page', newPage.toString())
+      next.set('page', newPage.toString())
     } else {
-      nextParams.delete('page')
+      next.delete('page')
     }
-    setSearchParams(nextParams, { replace: false })
-    window.scrollTo({ top: heroRef.current?.offsetHeight || 400, behavior: 'smooth' })
+    setSearchParams(next)
+    handleExplorePieces()
   }
 
-  // Loading Skeleton State
+  // Loading State
   if (isCollectionLoading) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pt-24 pb-20">
-        <PageMeta title="Loading Collection" description="Retrieving handcrafted furniture collection from Sri Anjaneya Furnitures." />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="h-[60svh] bg-[#111111] border border-[#2A2A2A] rounded-none animate-pulse" />
-          <div className="space-y-6">
-            <div className="h-6 w-48 bg-[#1A1816] rounded animate-pulse" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="aspect-[4/5] bg-[#111111] border border-[#2A2A2A] rounded-none animate-pulse" />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    return <CollectionDetailSkeleton />
   }
 
-  // Network Failure State
-  if (isCollectionError || isProductsError) {
+  // Collection Query Error State
+  if (isCollectionError) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pt-32 pb-20 flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pt-32 pb-20 flex items-center justify-center select-none">
         <PageMeta title="Collection Load Error" description="Unable to load collection details." noIndex={true} />
-        <div className="max-w-md mx-auto px-4 text-center space-y-4 bg-[#111111] border border-[#2A2A2A] p-8 rounded-none">
+        <div className="max-w-md mx-auto px-4 text-center space-y-4 bg-[#111111] border border-[#2A2A2A] p-8">
           <div className="w-12 h-12 rounded-full bg-red-950/40 border border-red-800/40 flex items-center justify-center mx-auto text-red-400">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -90,10 +98,10 @@ export const CollectionDetailPage: React.FC = () => {
             We Couldn't Load This Collection
           </h2>
           <p className="text-xs text-[#9B958B] leading-relaxed font-sans font-light">
-            {(collectionError || productsError)?.message || 'A network error occurred while retrieving this collection.'}
+            {collectionError?.message || 'A network error occurred while retrieving this collection.'}
           </p>
           <div className="pt-2 flex items-center justify-center gap-3">
-            <GoldButton onClick={() => { refetchCollection(); refetchProducts(); }} size="sm">
+            <GoldButton onClick={() => refetchCollection()} size="sm">
               Try Again
             </GoldButton>
             <Link to="/collections">
@@ -110,17 +118,17 @@ export const CollectionDetailPage: React.FC = () => {
   // Not Found State (404)
   if (!collection) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pt-32 pb-20 flex items-center justify-center">
-        <PageMeta title="Page Not Found" description="The requested furniture collection could not be found." noIndex={true} />
-        <div className="max-w-md mx-auto px-4 text-center space-y-4">
-          <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#C9A84C] font-semibold">
-            Collection Unavailable
+      <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pt-32 pb-20 flex items-center justify-center select-none">
+        <PageMeta title="Collection Not Found" description="The requested furniture collection could not be found." noIndex={true} />
+        <div className="max-w-md mx-auto px-4 text-center space-y-4 bg-[#0E0E0E] border border-[#222222] p-8 sm:p-10">
+          <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#C9A84C] font-semibold block">
+            COLLECTION UNAVAILABLE
           </span>
           <h1 className="text-3xl font-serif font-bold text-[#F5F0E8]">
             Collection Not Found
           </h1>
           <p className="text-xs text-[#9B958B] leading-relaxed font-sans font-light">
-            The requested furniture collection is either inactive or does not exist in our catalog.
+            The requested furniture collection is either inactive or does not exist in our master archive.
           </p>
           <div className="pt-4 flex items-center justify-center gap-3">
             <Link to="/collections">
@@ -135,16 +143,19 @@ export const CollectionDetailPage: React.FC = () => {
     )
   }
 
+  // Compute next adjacent collection from sorted list
+  const sortedActive = [...allCollections].sort((a, b) => a.sort_order - b.sort_order)
+  const currentIndex = sortedActive.findIndex((c) => c.slug === collection.slug)
+  const nextCollection = currentIndex >= 0 && currentIndex < sortedActive.length - 1
+    ? sortedActive[currentIndex + 1]
+    : undefined
+
   const products = productsData?.products || []
   const totalCount = productsData?.totalCount || 0
   const totalPages = productsData?.totalPages || 1
 
-  const coverImageUrl = collection.cover_image_path
-    ? getMediaUrl('brand-assets', collection.cover_image_path, 'hero')
-    : undefined
-
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pb-24">
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F0E8] pb-24 overflow-x-hidden w-full select-none">
       <PageMeta
         title={`${collection.name} | Sri Anjaneya Furnitures`}
         description={
@@ -152,111 +163,75 @@ export const CollectionDetailPage: React.FC = () => {
           `Discover handcrafted solid wood furniture in the ${collection.name} collection by Sri Anjaneya Furnitures.`
         }
         canonicalUrl={`/collections/${collection.slug}`}
-        ogImage={coverImageUrl}
       />
 
-      {/* 1. Collection Cover Hero Section */}
-      <div
-        ref={heroRef}
-        className="relative h-[65svh] sm:h-[75svh] w-full overflow-hidden bg-[#0A0A0A] border-b border-[#2A2A2A]"
+      {/* 1. Full-Bleed Collection Cover Canvas Hero */}
+      <CollectionCoverStage
+        collection={collection}
+        productCount={totalCount}
+        onExplorePieces={handleExplorePieces}
+      />
+
+      {/* 2. Collection Dossier Transition */}
+      <CollectionDossier
+        collection={collection}
+        productCount={totalCount}
+      />
+
+      {/* 4. Main Product Exhibition Section */}
+      <main
+        ref={exhibitionRef}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 sm:mt-16 space-y-16"
+        aria-label={`${collection.name} Collection Monograph`}
       >
-        {coverImageUrl ? (
-          <motion.img
-            src={coverImageUrl}
-            alt={collection.cover_image_alt || `${collection.name} Collection`}
-            style={
-              shouldReduceMotion
-                ? undefined
-                : {
-                  y: heroY,
-                  scale: heroScale,
-                }
-            }
-            loading="eager"
-            className="w-full h-full object-cover object-center"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#151412] via-[#0A0A0A] to-[#151412]" />
-        )}
+        <CollectionProductExhibition
+          collection={collection}
+          products={products}
+          totalCount={totalCount}
+          totalPages={totalPages}
+          currentPage={page}
+          sort={sort}
+          onSortChange={handleSortChange}
+          onPageChange={handlePageChange}
+          isLoading={isProductsLoading}
+          isError={isProductsError}
+          error={productsError}
+          onRetry={refetchProducts}
+        />
 
-        {/* Ambient Dark Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0A] via-[#0A0A0A]/50 to-[#0A0A0A]/30" />
+        {/* 5. Next Collection Monograph Chapter Bridge */}
+        <NextCollectionChapter nextCollection={nextCollection} />
 
-        {/* Hero Content Overlay */}
-        <div className="absolute inset-0 flex flex-col justify-end">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 sm:pb-16 w-full space-y-4">
-            {/* Breadcrumb Navigation */}
-            <AppBreadcrumb
-              items={[
-                { label: 'Home', href: '/' },
-                { label: 'Collections', href: '/collections' },
-                { label: collection.name, isCurrent: true },
-              ]}
-              className="text-xs"
-            />
-
-            <span className="text-[10px] sm:text-xs uppercase font-mono tracking-[0.25em] text-[#C9A84C] font-semibold block">
-              Curated Collection
-            </span>
-
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-bold text-[#F5F0E8] tracking-tight leading-[1.08] max-w-3xl">
-              {collection.name}
-            </h1>
-
-            {collection.description && (
-              <p className="text-xs sm:text-sm lg:text-base text-[#D1CCC2]/90 font-sans font-light leading-relaxed max-w-2xl">
-                {collection.description}
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Collection Products Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 space-y-10">
-        <div className="flex items-center justify-between border-b border-[#2A2A2A] pb-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#F5F0E8]">
-              Explore {collection.name} Pieces
-            </h2>
-            <span className="text-xs font-mono text-[#9B958B] mt-0.5 block">
-              {totalCount} {totalCount === 1 ? 'Handcrafted Piece' : 'Handcrafted Pieces'}
-            </span>
-          </div>
-        </div>
-
-        {/* Product Grid or Empty State */}
-        {products.length === 0 && !isProductsLoading ? (
-          <div className="py-20 text-center max-w-md mx-auto space-y-4">
+        {/* 6. Bespoke Commission Closing CTA */}
+        <section
+          aria-label="Custom Furniture Commission Call to Action"
+          className="p-8 sm:p-12 bg-gradient-to-br from-[#121212] via-[#0E0E0E] to-[#0A0A0A] border border-[#222222] flex flex-col md:flex-row items-center justify-between gap-6"
+        >
+          <div className="space-y-2 text-center md:text-left max-w-xl">
             <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#C9A84C] font-semibold">
-              Catalogue Update
+              CUSTOM SPATIAL COMMISSIONS
             </span>
-            <h3 className="font-serif text-2xl text-[#F5F0E8] font-bold">
-              No pieces are currently available in this collection.
+            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#F5F0E8]">
+              Need a Piece Tailored to Your Space?
             </h3>
-            <p className="text-xs text-[#9B958B] leading-relaxed font-sans font-light">
-              Pieces for this collection are being handcrafted in our workshop. Explore our other published collections in the meantime.
+            <p className="text-xs sm:text-sm text-[#9B958B] font-sans font-light">
+              Every design in the {collection.name} collection can be tailored in timber variety, fabric selection, and custom spatial dimensions.
             </p>
-            <div className="pt-3">
-              <Link to="/products">
-                <GoldButton size="sm">Browse All Furniture</GoldButton>
-              </Link>
-            </div>
           </div>
-        ) : (
-          <div className="space-y-12">
-            <ProductGrid products={products} isLoading={isProductsLoading} />
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <ProductPagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            )}
+          <div className="flex flex-wrap items-center justify-center gap-4 shrink-0">
+            <Link to="/contact">
+              <GoldButton size="lg" className="text-xs uppercase font-mono tracking-wider">
+                Request Custom Quote
+              </GoldButton>
+            </Link>
+            <Link to="/gallery">
+              <GoldButton variant="outline" size="lg" className="text-xs uppercase font-mono tracking-wider">
+                Explore Gallery
+              </GoldButton>
+            </Link>
           </div>
-        )}
+        </section>
       </main>
     </div>
   )

@@ -48,7 +48,7 @@ export const GoldButton = React.forwardRef<HTMLButtonElement, GoldButtonProps>(
         ref={ref}
         type={type}
         disabled={isDisabled}
-        className={`inline-flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed uppercase font-sans font-medium outline-none select-none text-center ${sizeClasses} ${variantClasses} ${className}`}
+        className={`inline-flex items-center justify-center gap-2 whitespace-nowrap transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed uppercase font-sans font-medium outline-none select-none text-center ${sizeClasses} ${variantClasses} ${className}`}
         {...props}
       >
         {loading ? (

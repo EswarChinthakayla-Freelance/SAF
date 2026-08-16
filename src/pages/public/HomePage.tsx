@@ -2,7 +2,7 @@ import React from 'react'
 import { PageMeta } from '@/components/seo/PageMeta'
 import { HeroSection } from '@/components/features/home/HeroSection'
 import { BrandStatement } from '@/components/features/home/BrandStatement'
-import { CategoryGateway } from '@/components/features/home/CategoryGateway'
+import { MadeForEveryRoomSection } from '@/components/features/home/MadeForEveryRoomSection'
 import { FeaturedProducts } from '@/components/features/home/FeaturedProducts'
 import { EditorialCollectionStory } from '@/components/features/home/EditorialCollectionStory'
 import { FurnitureStorySection } from '@/components/features/home/FurnitureStorySection'
@@ -27,8 +27,8 @@ export const HomePage: React.FC = () => {
       {/* 2. Brand Statement Transition (Quiet Editorial Reset) */}
       <BrandStatement />
 
-      {/* 3. Curated Category Gateway (Explore by Space — Asymmetric Grid) */}
-      <CategoryGateway />
+      {/* 3. Curated Spatial Room Rail (Made for Every Room — Scroll-Driven Room Journey) */}
+      <MadeForEveryRoomSection />
 
       {/* 4. Curated Featured Pieces */}
       <FeaturedProducts />

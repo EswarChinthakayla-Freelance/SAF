@@ -12,7 +12,9 @@ const CollectionsPage = lazy(() => import('@/pages/public/CollectionsPage'))
 const CollectionDetailPage = lazy(() => import('@/pages/public/CollectionDetailPage'))
 const ProductsPage = lazy(() => import('@/pages/public/ProductsPage'))
 const ProductDetailPage = lazy(() => import('@/pages/public/ProductDetailPage'))
+const ProductVisualViewerPage = lazy(() => import('@/pages/public/ProductVisualViewerPage'))
 const GalleryPage = lazy(() => import('@/pages/public/GalleryPage'))
+const GalleryInspectPage = lazy(() => import('@/pages/public/GalleryInspectPage'))
 const AboutPage = lazy(() => import('@/pages/public/AboutPage'))
 const ContactPage = lazy(() => import('@/pages/public/ContactPage'))
 const SearchPage = lazy(() => import('@/pages/public/SearchPage'))
@@ -135,7 +137,38 @@ export const router = createBrowserRouter([
     ],
   },
 
-  // 2. Standalone Admin Authentication
+  // 2. Dedicated Full-Page Product Visual Inspection (Light-Table Workspace)
+  {
+    path: '/products/:slug/view',
+    errorElement: <RouteErrorBoundary />,
+    element: (
+      <SuspenseWrapper label="Loading Visual Inspection Workspace...">
+        <ProductVisualViewerPage />
+      </SuspenseWrapper>
+    ),
+  },
+
+  // 3. Dedicated Full-Page Gallery Frame Inspection Studio
+  {
+    path: '/gallery/frame/:id',
+    errorElement: <RouteErrorBoundary />,
+    element: (
+      <SuspenseWrapper label="Loading Inspiration Inspection Studio...">
+        <GalleryInspectPage />
+      </SuspenseWrapper>
+    ),
+  },
+  {
+    path: '/gallery/:id',
+    errorElement: <RouteErrorBoundary />,
+    element: (
+      <SuspenseWrapper label="Loading Inspiration Inspection Studio...">
+        <GalleryInspectPage />
+      </SuspenseWrapper>
+    ),
+  },
+
+  // 4. Standalone Admin Authentication
   {
     path: '/admin/login',
     errorElement: <RouteErrorBoundary />,
@@ -146,7 +179,7 @@ export const router = createBrowserRouter([
     ),
   },
 
-  // 3. Protected Admin Control Panel Routes
+  // 4. Protected Admin Control Panel Routes
   {
     path: '/admin',
     element: (
