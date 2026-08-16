@@ -137,11 +137,10 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
   return (
     <div
       ref={canvasRef}
-      className={`select-none transition-all duration-200 overflow-hidden flex items-center justify-center ${
-        isFullscreen
+      className={`select-none transition-all duration-200 overflow-hidden flex items-center justify-center ${isFullscreen
           ? 'fixed inset-0 z-[100] w-screen h-screen bg-[#070707]'
-          : 'relative flex-1 w-full bg-[#070707] border border-[#222222] rounded-lg shadow-2xl min-h-[420px] lg:min-h-[560px]'
-      }`}
+          : 'relative flex-1 w-full bg-[#070707] border border-[#222222] rounded-none shadow-2xl min-h-[420px] lg:min-h-[560px]'
+        }`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -206,7 +205,7 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
 
       {/* Bottom Floating Control Dock */}
       <div className="absolute bottom-4 inset-x-0 flex items-center justify-center pointer-events-none z-30">
-        <div className="inline-flex items-center gap-1 p-1.5 rounded-lg bg-[#0E0E0E]/90 backdrop-blur-md border border-[#2A2A2A] shadow-2xl pointer-events-auto">
+        <div className="inline-flex items-center gap-1 p-1.5 rounded-none bg-[#0E0E0E]/90 backdrop-blur-md border border-[#2A2A2A] shadow-2xl pointer-events-auto">
           {/* Zoom Out */}
           <Button
             type="button"
@@ -266,9 +265,8 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
             onClick={onToggleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen (F)'}
-            className={`w-8 h-8 p-0 rounded transition-colors ${
-              isFullscreen ? 'text-[#C9A84C] bg-[#1E1E1E]' : 'text-[#A8A29E] hover:text-[#F5F0E8] hover:bg-[#1E1E1E]'
-            }`}
+            className={`w-8 h-8 p-0 rounded transition-colors ${isFullscreen ? 'text-[#C9A84C] bg-[#1E1E1E]' : 'text-[#A8A29E] hover:text-[#F5F0E8] hover:bg-[#1E1E1E]'
+              }`}
           >
             <HugeiconsIcon icon={isFullscreen ? Minimize01Icon : FullScreenIcon} className="w-4 h-4" />
           </Button>

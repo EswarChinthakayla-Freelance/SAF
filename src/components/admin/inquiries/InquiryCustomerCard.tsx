@@ -16,7 +16,7 @@ export const InquiryCustomerCard: React.FC<InquiryCustomerCardProps> = ({ inquir
   const cleanPhone = inquiry.phone ? inquiry.phone.replace(/[^0-9]/g, '') : null
 
   return (
-    <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 space-y-3.5 shadow-sm">
+    <div className="bg-[#141414] border border-[#262626] rounded-none p-4 space-y-3.5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

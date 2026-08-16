@@ -25,7 +25,7 @@ export const InquiryProductContext: React.FC<InquiryProductContextProps> = ({ in
     : null
 
   return (
-    <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 space-y-3 shadow-sm">
+    <div className="bg-[#141414] border border-[#262626] rounded-none p-4 space-y-3 shadow-sm">
       {/* Section Header */}
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#C9A84C]">

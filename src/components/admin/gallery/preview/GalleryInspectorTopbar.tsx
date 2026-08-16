@@ -46,7 +46,7 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
   backHref = '/admin/gallery',
 }) => {
   return (
-    <header className="bg-[#111111] border border-[#242424] px-4 sm:px-6 py-3 rounded-lg flex flex-wrap items-center justify-between gap-3 shadow-md">
+    <header className="bg-[#111111] border border-[#242424] px-4 sm:px-6 py-3 rounded-none flex flex-wrap items-center justify-between gap-3 shadow-md">
       {/* Left: Back Button & Index Counter */}
       <div className="flex items-center gap-2.5 min-w-0">
         <Link
@@ -75,16 +75,14 @@ export const GalleryInspectorTopbar: React.FC<GalleryInspectorTopbarProps> = ({
           onClick={onToggleActive}
           title={`Click to ${image.is_active ? 'hide from' : 'show in'} public gallery`}
           aria-label={`Visibility: ${image.is_active ? 'Visible' : 'Hidden'}. Click to toggle`}
-          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded text-xs font-sans font-medium border transition-all cursor-pointer ${
-            image.is_active
+          className={`inline-flex items-center gap-1.5 h-8 px-3 rounded text-xs font-sans font-medium border transition-all cursor-pointer ${image.is_active
               ? 'bg-[#0D1510] text-[#4ADE80] border-[#22C55E]/40 hover:bg-[#122018]'
               : 'bg-[#181818] text-[#8A847A] border-[#2E2E2E] hover:text-[#F5F0E8]'
-          }`}
+            }`}
         >
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
-              image.is_active ? 'bg-[#22C55E]' : 'bg-[#7A746B]'
-            }`}
+            className={`w-1.5 h-1.5 rounded-full ${image.is_active ? 'bg-[#22C55E]' : 'bg-[#7A746B]'
+              }`}
           />
           <span>{image.is_active ? 'Visible' : 'Hidden'}</span>
         </button>

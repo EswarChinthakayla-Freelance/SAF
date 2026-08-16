@@ -192,7 +192,7 @@ export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = ({
           <InquiryProductContext inquiry={fullInquiry} />
 
           {/* Customer Message Section (Readable Content Block) */}
-          <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 sm:p-5 space-y-3 shadow-sm">
+          <div className="bg-[#141414] border border-[#262626] rounded-none p-4 sm:p-5 space-y-3 shadow-sm">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#C9A84C]">
                 <HugeiconsIcon icon={Comment01Icon} className="w-3.5 h-3.5" />
@@ -235,7 +235,7 @@ export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = ({
           />
 
           {/* Technical Metadata Section */}
-          <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 space-y-2.5 text-xs">
+          <div className="bg-[#141414] border border-[#262626] rounded-none p-4 space-y-2.5 text-xs">
             <div className="flex items-center gap-2 text-[#8A847A]">
               <HugeiconsIcon icon={InformationCircleIcon} className="w-3.5 h-3.5 text-[#C9A84C]" />
               <span className="text-[11px] font-sans font-medium uppercase tracking-wider">
