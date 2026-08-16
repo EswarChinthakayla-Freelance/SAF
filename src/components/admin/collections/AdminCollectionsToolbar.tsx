@@ -59,7 +59,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
             placeholder="Search collections…"
             aria-label="Search collections"
             disabled={isReorderMode}
-            className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5F0E8] placeholder:text-[#666158] text-xs sm:text-sm pl-9 pr-9 py-2 rounded-md outline-none transition-colors"
+            className="w-full h-9 bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5F0E8] placeholder:text-[#666158] text-xs sm:text-sm pl-9 pr-9 rounded-md outline-none transition-colors"
           />
           {searchQuery && (
             <button
@@ -102,7 +102,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
             onClick={onToggleReorderMode}
             aria-label={isReorderMode ? 'Exit reorder mode' : 'Reorder collections'}
             title={isReorderMode ? 'Exit reorder mode' : 'Reorder collections'}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
+            className={`inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
               isReorderMode
                 ? 'bg-[#C9A84C] text-[#0A0A0A] border-[#C9A84C] font-semibold'
                 : 'bg-[#161616] text-[#9B958B] hover:text-[#F5F0E8] border-[#2A2A2A] hover:bg-[#1E1E1E]'
@@ -118,7 +118,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
           <div
             role="radiogroup"
             aria-label="Collection view switcher"
-            className="flex items-center p-0.5 bg-[#161616] border border-[#2A2A2A] rounded-md"
+            className="flex items-center h-9 p-0.5 bg-[#161616] border border-[#2A2A2A] rounded-md"
           >
             <button
               type="button"
@@ -128,7 +128,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
               title="List view"
               disabled={isReorderMode}
               onClick={() => onViewModeChange('list')}
-              className={`p-1.5 rounded transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                 viewMode === 'list'
                   ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
                   : 'text-[#7A746B] hover:text-[#F5F0E8]'
@@ -144,7 +144,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
               title="Collection board view"
               disabled={isReorderMode}
               onClick={() => onViewModeChange('board')}
-              className={`p-1.5 rounded transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                 viewMode === 'board'
                   ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
                   : 'text-[#7A746B] hover:text-[#F5F0E8]'
