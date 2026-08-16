@@ -21,7 +21,11 @@ describe('Form Accessibility & Validation Semantics', () => {
   })
 
   it('renders all form inputs with accessible labels and required indicators', () => {
-    render(<InquiryForm onSuccess={vi.fn()} />)
+    render(
+      <MemoryRouter>
+        <InquiryForm onSuccess={vi.fn()} />
+      </MemoryRouter>
+    )
 
     expect(screen.getByLabelText(/Full Name/i)).toBeDefined()
     expect(screen.getByLabelText(/Email Address/i)).toBeDefined()
@@ -29,9 +33,13 @@ describe('Form Accessibility & Validation Semantics', () => {
   })
 
   it('sets aria-invalid and aria-describedby error elements on validation failure', async () => {
-    render(<InquiryForm onSuccess={vi.fn()} />)
+    render(
+      <MemoryRouter>
+        <InquiryForm onSuccess={vi.fn()} />
+      </MemoryRouter>
+    )
 
-    const submitBtn = screen.getByRole('button', { name: /Send Inquiry/i })
+    const submitBtn = screen.getByRole('button', { name: /Send Inquiry Brief/i })
     fireEvent.click(submitBtn)
 
     await waitFor(() => {
