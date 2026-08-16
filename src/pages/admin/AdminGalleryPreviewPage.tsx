@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { PageMeta } from '@/components/seo/PageMeta'
 import { GalleryInspectorTopbar } from '@/components/admin/gallery/preview/GalleryInspectorTopbar'
@@ -33,7 +33,7 @@ export const AdminGalleryPreviewPage: React.FC = () => {
   // 3. Mutations
   const { deleteGalleryImage, toggleActive } = useGalleryMutations()
 
-  // 4. Modal / Sheet States
+  // 4. Modal / Sheet / Fullscreen States
   const [showEditSheet, setShowEditSheet] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -79,6 +79,50 @@ export const AdminGalleryPreviewPage: React.FC = () => {
       setIsDeleting(false)
     }
   }
+
+  // Fullscreen controller with native API and fallback
+  const handleToggleFullscreen = useCallback(async () => {
+    try {
+      if (!document.fullscreenElement && !(document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen()
+        } else if ((document.documentElement as unknown as { webkitRequestFullscreen?: () => Promise<void> }).webkitRequestFullscreen) {
+          await (document.documentElement as unknown as { webkitRequestFullscreen: () => Promise<void> }).webkitRequestFullscreen()
+        }
+        setIsFullscreen(true)
+      } else {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if ((document as unknown as { webkitExitFullscreen?: () => Promise<void> }).webkitExitFullscreen) {
+          await (document as unknown as { webkitExitFullscreen: () => Promise<void> }).webkitExitFullscreen()
+        }
+        setIsFullscreen(false)
+      }
+    } catch {
+      // Fallback to CSS overlay fullscreen
+      setIsFullscreen((prev) => !prev)
+    }
+  }, [])
+
+  // Listen to native fullscreen exit events (e.g. Esc key)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isNativeFull = Boolean(
+        document.fullscreenElement ||
+          (document as unknown as { webkitFullscreenElement?: Element }).webkitFullscreenElement
+      )
+      if (!isNativeFull && isFullscreen) {
+        setIsFullscreen(false)
+      }
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+    }
+  }, [isFullscreen])
 
   // 5. Loading State
   if (isLoading) {
@@ -163,7 +207,7 @@ export const AdminGalleryPreviewPage: React.FC = () => {
         currentIndex={currentIndex >= 0 ? currentIndex : undefined}
         totalImages={sequence.length}
         onEditMetadata={() => setShowEditSheet(true)}
-        onToggleFullscreen={() => setIsFullscreen((prev) => !prev)}
+        onToggleFullscreen={handleToggleFullscreen}
         isFullscreen={isFullscreen}
         onToggleActive={handleToggleActive}
         onDelete={() => setShowDeleteDialog(true)}
@@ -179,6 +223,8 @@ export const AdminGalleryPreviewPage: React.FC = () => {
           onNext={handleNext}
           hasPrevious={hasPrevious}
           hasNext={hasNext}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
         />
 
         {/* Structured Metadata & Checklist Panel */}

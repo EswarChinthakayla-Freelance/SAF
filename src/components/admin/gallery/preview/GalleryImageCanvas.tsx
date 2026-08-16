@@ -10,6 +10,7 @@ import {
   ArrowRight01Icon,
   FullScreenIcon,
   Minimize01Icon,
+  Cancel01Icon,
 } from '@hugeicons/core-free-icons'
 import type { AdminGalleryItem } from '@/types/app'
 
@@ -19,6 +20,8 @@ export interface GalleryImageCanvasProps {
   onNext?: () => void
   hasPrevious?: boolean
   hasNext?: boolean
+  isFullscreen?: boolean
+  onToggleFullscreen?: () => void
 }
 
 export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
@@ -27,12 +30,13 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
   onNext,
   hasPrevious = false,
   hasNext = false,
+  isFullscreen = false,
+  onToggleFullscreen,
 }) => {
   const [zoom, setZoom] = useState(1)
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [isFullscreen, setIsFullscreen] = useState(false)
 
   const canvasRef = useRef<HTMLDivElement>(null)
   const imageUrl = getMediaUrl('gallery-images', image.storage_path, 'gallery-inspect')
@@ -60,24 +64,7 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
     setPan({ x: 0, y: 0 })
   }, [])
 
-  const toggleFullscreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      canvasRef.current?.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {})
-    } else {
-      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {})
-    }
-  }, [])
-
-  // Listen for fullscreen change
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement))
-    }
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
-
-  // Keyboard navigation & zoom shortcuts
+  // Keyboard navigation, zoom, and fullscreen shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ignore key events if focused in an input/textarea
@@ -101,12 +88,28 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
       } else if (e.key === '0') {
         e.preventDefault()
         handleResetZoom()
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault()
+        onToggleFullscreen?.()
+      } else if (e.key === 'Escape' && isFullscreen) {
+        e.preventDefault()
+        onToggleFullscreen?.()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [hasPrevious, hasNext, onPrevious, onNext, handleZoomIn, handleZoomOut, handleResetZoom])
+  }, [
+    hasPrevious,
+    hasNext,
+    onPrevious,
+    onNext,
+    handleZoomIn,
+    handleZoomOut,
+    handleResetZoom,
+    isFullscreen,
+    onToggleFullscreen,
+  ])
 
   // Mouse pan handlers when zoom > 1
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -134,7 +137,11 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
   return (
     <div
       ref={canvasRef}
-      className="relative flex-1 w-full bg-[#070707] border border-[#222222] rounded-lg overflow-hidden flex items-center justify-center select-none shadow-2xl min-h-[420px] lg:min-h-[560px]"
+      className={`select-none transition-all duration-200 overflow-hidden flex items-center justify-center ${
+        isFullscreen
+          ? 'fixed inset-0 z-[100] w-screen h-screen bg-[#070707]'
+          : 'relative flex-1 w-full bg-[#070707] border border-[#222222] rounded-lg shadow-2xl min-h-[420px] lg:min-h-[560px]'
+      }`}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -143,7 +150,22 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
         cursor: zoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
       }}
     >
-      {/* Primary Inspector Image */}
+      {/* Fullscreen Close / Exit Action at Top-Right */}
+      {isFullscreen && (
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            aria-label="Exit fullscreen"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#161616]/90 hover:bg-[#242424] text-[#D1CCC2] hover:text-[#F5F0E8] border border-[#2E2E2E] shadow-2xl backdrop-blur-md text-xs font-mono transition-colors cursor-pointer"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="w-3.5 h-3.5" />
+            <span>Exit Fullscreen (Esc)</span>
+          </button>
+        </div>
+      )}
+
+      {/* Primary Inspector Image Stage */}
       <div
         className="w-full h-full flex items-center justify-center p-4 sm:p-8 transition-transform duration-100 ease-out"
         style={{
@@ -165,7 +187,7 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
           type="button"
           onClick={onPrevious}
           aria-label="Previous gallery image"
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#0E0E0E]/80 hover:bg-[#1C1C1C] text-[#D1CCC2] hover:text-[#F5F0E8] border border-[#2E2E2E] flex items-center justify-center shadow-xl backdrop-blur-md transition-all hover:scale-105 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C]"
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#0E0E0E]/80 hover:bg-[#1C1C1C] text-[#D1CCC2] hover:text-[#F5F0E8] border border-[#2E2E2E] flex items-center justify-center shadow-xl backdrop-blur-md transition-all hover:scale-105 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] z-30"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} className="w-5 h-5" />
         </button>
@@ -176,14 +198,14 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
           type="button"
           onClick={onNext}
           aria-label="Next gallery image"
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#0E0E0E]/80 hover:bg-[#1C1C1C] text-[#D1CCC2] hover:text-[#F5F0E8] border border-[#2E2E2E] flex items-center justify-center shadow-xl backdrop-blur-md transition-all hover:scale-105 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C]"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#0E0E0E]/80 hover:bg-[#1C1C1C] text-[#D1CCC2] hover:text-[#F5F0E8] border border-[#2E2E2E] flex items-center justify-center shadow-xl backdrop-blur-md transition-all hover:scale-105 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] z-30"
         >
           <HugeiconsIcon icon={ArrowRight01Icon} className="w-5 h-5" />
         </button>
       )}
 
       {/* Bottom Floating Control Dock */}
-      <div className="absolute bottom-4 inset-x-0 flex items-center justify-center pointer-events-none">
+      <div className="absolute bottom-4 inset-x-0 flex items-center justify-center pointer-events-none z-30">
         <div className="inline-flex items-center gap-1 p-1.5 rounded-lg bg-[#0E0E0E]/90 backdrop-blur-md border border-[#2A2A2A] shadow-2xl pointer-events-auto">
           {/* Zoom Out */}
           <Button
@@ -241,10 +263,12 @@ export const GalleryImageCanvas: React.FC<GalleryImageCanvasProps> = ({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={toggleFullscreen}
+            onClick={onToggleFullscreen}
             aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-            className="w-8 h-8 p-0 text-[#A8A29E] hover:text-[#F5F0E8] hover:bg-[#1E1E1E] rounded"
+            title={isFullscreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen (F)'}
+            className={`w-8 h-8 p-0 rounded transition-colors ${
+              isFullscreen ? 'text-[#C9A84C] bg-[#1E1E1E]' : 'text-[#A8A29E] hover:text-[#F5F0E8] hover:bg-[#1E1E1E]'
+            }`}
           >
             <HugeiconsIcon icon={isFullscreen ? Minimize01Icon : FullScreenIcon} className="w-4 h-4" />
           </Button>
