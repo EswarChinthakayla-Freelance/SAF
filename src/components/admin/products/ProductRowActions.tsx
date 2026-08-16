@@ -38,15 +38,15 @@ export const ProductRowActions: React.FC<ProductRowActionsProps> = ({
       className="flex items-center justify-end gap-1.5"
       onClick={(e) => e.stopPropagation()}
     >
-      {/* Primary Edit Button */}
+      {/* Primary Action Button: View / Preview */}
       <button
         type="button"
-        onClick={() => navigate(`/admin/products/${product.id}`)}
-        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-sans font-medium text-[#C9A84C] hover:text-[#E8B84B] hover:bg-[#1C1C1C] rounded transition-colors cursor-pointer"
-        aria-label={`Edit ${product.name}`}
+        onClick={() => navigate(`/admin/products/${product.id}/preview`)}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans font-medium text-[#C9A84C] hover:text-[#E8B84B] hover:bg-[#1C1C1C] rounded transition-colors cursor-pointer"
+        aria-label={`View ${product.name}`}
       >
-        <HugeiconsIcon icon={Edit01Icon} className="w-3.5 h-3.5" />
-        <span>Edit</span>
+        <HugeiconsIcon icon={ViewIcon} className="w-3.5 h-3.5" />
+        <span>View</span>
       </button>
 
       {/* More Actions Dropdown Menu */}
@@ -62,7 +62,16 @@ export const ProductRowActions: React.FC<ProductRowActionsProps> = ({
           align="end"
           className="w-48 bg-[#111111] border border-[#2A2A2A] text-[#F5F0E8] p-1 shadow-xl z-50 rounded-none"
         >
-          {/* Edit Product */}
+          {/* Inspect Piece (Preview) */}
+          <DropdownMenuItem
+            onClick={() => navigate(`/admin/products/${product.id}/preview`)}
+            className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#1C1C1C] rounded cursor-pointer"
+          >
+            <HugeiconsIcon icon={ViewIcon} className="w-3.5 h-3.5 text-[#9B958B]" />
+            <span>Product Inspector</span>
+          </DropdownMenuItem>
+
+          {/* Edit Product Details */}
           <DropdownMenuItem
             onClick={() => navigate(`/admin/products/${product.id}`)}
             className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#1C1C1C] rounded cursor-pointer"
@@ -77,7 +86,7 @@ export const ProductRowActions: React.FC<ProductRowActionsProps> = ({
               onClick={() => window.open(`/products/${product.slug}`, '_blank', 'noopener,noreferrer')}
               className="flex items-center gap-2 px-2.5 py-1.5 text-xs text-[#D1CCC2] hover:text-[#F5F0E8] hover:bg-[#1C1C1C] rounded cursor-pointer"
             >
-              <HugeiconsIcon icon={ViewIcon} className="w-3.5 h-3.5 text-[#9B958B]" />
+              <HugeiconsIcon icon={GlobeIcon} className="w-3.5 h-3.5 text-[#9B958B]" />
               <span>View on Website</span>
             </DropdownMenuItem>
           )}

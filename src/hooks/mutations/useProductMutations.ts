@@ -356,8 +356,9 @@ export function useProductMutations() {
       }
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.products.all })
+      queryClient.invalidateQueries({ queryKey: queryKeys.products.adminDetail(data.id) })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.metrics() })
     },
     retry: false,

@@ -17,7 +17,7 @@ export const AdminCollectionReorderBar: React.FC<AdminCollectionReorderBarProps>
   onCancel,
 }) => {
   return (
-    <div className="bg-[#18150D] border border-[#C9A84C]/40 rounded-lg p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-md animate-fade-in font-sans">
+    <div className="bg-[#18150D] border border-[#C9A84C]/40 rounded-none p-3 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-md animate-fade-in font-sans">
       <div className="flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/40 flex items-center justify-center text-[#E8B84B] shrink-0">
           <HugeiconsIcon icon={Sorting05Icon} className="w-4 h-4" />

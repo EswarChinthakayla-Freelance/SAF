@@ -84,11 +84,12 @@ describe('Admin Products Feature Components', () => {
       </MemoryRouter>
     )
 
-    expect(screen.getByRole('button', { name: 'Edit Rosewood Sanctum Mandir' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'View Rosewood Sanctum Mandir' })).toBeDefined()
 
     const moreBtn = screen.getByRole('button', { name: 'More actions for Rosewood Sanctum Mandir' })
     fireEvent.click(moreBtn)
 
+    expect(screen.getByText('Product Inspector')).toBeDefined()
     expect(screen.getByText('Edit Details')).toBeDefined()
     expect(screen.getByText('View on Website')).toBeDefined()
     expect(screen.getByText('Unpublish to Draft')).toBeDefined()
@@ -114,7 +115,7 @@ describe('Admin Products Feature Components', () => {
     expect(screen.getByText('SAF-MDR-042')).toBeDefined()
     expect(screen.getByText('Sacred Sanctum')).toBeDefined()
     expect(screen.getByText('₹1,45,000')).toBeDefined()
-    expect(screen.getByText('Edit Product')).toBeDefined()
+    expect(screen.getByText('View Piece')).toBeDefined()
   })
 
   it('renders AdminProductMobileRow with compact details', () => {

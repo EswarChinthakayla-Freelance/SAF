@@ -228,7 +228,7 @@ export const AdminProductEditPage: React.FC = () => {
       removedStoragePaths,
     })
 
-    navigate('/admin/products')
+    navigate(`/admin/products/${id}/preview`)
   }
 
   const handleDeleteConfirm = async () => {
@@ -286,6 +286,7 @@ export const AdminProductEditPage: React.FC = () => {
         onUploadImages={handleUploadImages}
         onCreateTag={handleCreateTag}
         isEditing={true}
+        cancelHref={`/admin/products/${product.id}/preview`}
       />
 
       {/* Delete Confirmation */}

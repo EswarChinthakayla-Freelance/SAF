@@ -6,7 +6,7 @@ import { formatCurrency } from '@/utils/formatCurrency'
 import { formatDate } from '@/utils/dates'
 import { getMediaUrl } from '@/lib/media'
 import { HugeiconsIcon } from '@hugeicons/react'
-import { Image01Icon, Edit01Icon } from '@hugeicons/core-free-icons'
+import { Image01Icon, ViewIcon } from '@hugeicons/core-free-icons'
 import type { ProductListItem } from '@/types/app'
 
 export interface AdminProductCardProps {
@@ -29,7 +29,7 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
 
   return (
     <div
-      onClick={() => navigate(`/admin/products/${product.id}`)}
+      onClick={() => navigate(`/admin/products/${product.id}/preview`)}
       className="group relative bg-[#111111] border border-[#242424] hover:border-[#383838] rounded-none overflow-hidden flex flex-col justify-between transition-all duration-200 shadow-sm cursor-pointer hover:bg-[#141414]"
     >
       {/* 1. Image Stage */}
@@ -106,11 +106,11 @@ export const AdminProductCard: React.FC<AdminProductCardProps> = ({
       >
         <button
           type="button"
-          onClick={() => navigate(`/admin/products/${product.id}`)}
-          className="inline-flex items-center gap-1 text-xs font-sans font-medium text-[#C9A84C] hover:text-[#E8B84B] transition-colors cursor-pointer"
+          onClick={() => navigate(`/admin/products/${product.id}/preview`)}
+          className="inline-flex items-center gap-1.5 text-xs font-sans font-medium text-[#C9A84C] hover:text-[#E8B84B] transition-colors cursor-pointer"
         >
-          <HugeiconsIcon icon={Edit01Icon} className="w-3.5 h-3.5" />
-          <span>Edit Product</span>
+          <HugeiconsIcon icon={ViewIcon} className="w-3.5 h-3.5" />
+          <span>View Piece</span>
         </button>
 
         {onTogglePublish && (

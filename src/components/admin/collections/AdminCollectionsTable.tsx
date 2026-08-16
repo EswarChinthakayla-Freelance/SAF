@@ -31,7 +31,7 @@ export const AdminCollectionsTable: React.FC<AdminCollectionsTableProps> = ({
   return (
     <div className="space-y-3 font-sans">
       {/* Desktop / Tablet Table View (>= 640px) */}
-      <div className="hidden sm:block bg-[#111111] border border-[#242424] rounded-lg overflow-hidden shadow-sm">
+      <div className="hidden sm:block bg-[#111111] border border-[#242424] rounded-none overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -91,7 +91,7 @@ export const AdminCollectionsTable: React.FC<AdminCollectionsTableProps> = ({
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3.5">
                         {/* 64x64 Thumbnail */}
-                        <div className="w-16 h-16 rounded-md bg-[#181818] border border-[#2A2A2A] overflow-hidden shrink-0 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-none bg-[#181818] border border-[#2A2A2A] overflow-hidden shrink-0 flex items-center justify-center">
                           {thumbUrl ? (
                             <img
                               src={thumbUrl}
@@ -178,7 +178,7 @@ export const AdminCollectionsTable: React.FC<AdminCollectionsTableProps> = ({
           return (
             <div
               key={col.id}
-              className="bg-[#111111] border border-[#242424] rounded-lg p-3.5 space-y-3"
+              className="bg-[#111111] border border-[#242424] rounded-none p-3.5 space-y-3"
             >
               <div className="flex items-center gap-3">
                 {/* 56x56 Thumbnail */}

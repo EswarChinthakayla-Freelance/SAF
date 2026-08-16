@@ -45,7 +45,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
   return (
     <div className="space-y-3 font-sans">
       {/* Primary Toolbar Bar */}
-      <div className="bg-[#111111] border border-[#242424] rounded-lg p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
+      <div className="bg-[#111111] border border-[#242424] rounded-none p-3 sm:p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-sm">
         {/* Left: Search Input */}
         <div className="relative flex-1 min-w-0">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#7A746B]">
@@ -59,7 +59,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
             placeholder="Search collections…"
             aria-label="Search collections"
             disabled={isReorderMode}
-            className="w-full h-9 bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5F0E8] placeholder:text-[#666158] text-xs sm:text-sm pl-9 pr-9 rounded-md outline-none transition-colors"
+            className="w-full h-9 bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] disabled:opacity-50 disabled:cursor-not-allowed text-[#F5F0E8] placeholder:text-[#666158] text-xs sm:text-sm pl-9 pr-9 rounded-none outline-none transition-colors"
           />
           {searchQuery && (
             <button
@@ -102,11 +102,10 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
             onClick={onToggleReorderMode}
             aria-label={isReorderMode ? 'Exit reorder mode' : 'Reorder collections'}
             title={isReorderMode ? 'Exit reorder mode' : 'Reorder collections'}
-            className={`inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
-              isReorderMode
-                ? 'bg-[#C9A84C] text-[#0A0A0A] border-[#C9A84C] font-semibold'
-                : 'bg-[#161616] text-[#9B958B] hover:text-[#F5F0E8] border-[#2A2A2A] hover:bg-[#1E1E1E]'
-            }`}
+            className={`inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-none text-xs font-medium border transition-colors cursor-pointer ${isReorderMode
+              ? 'bg-[#C9A84C] text-[#0A0A0A] border-[#C9A84C] font-semibold'
+              : 'bg-[#161616] text-[#9B958B] hover:text-[#F5F0E8] border-[#2A2A2A] hover:bg-[#1E1E1E]'
+              }`}
           >
             <HugeiconsIcon icon={Sorting05Icon} className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">
@@ -118,7 +117,7 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
           <div
             role="radiogroup"
             aria-label="Collection view switcher"
-            className="flex items-center h-9 p-0.5 bg-[#161616] border border-[#2A2A2A] rounded-md"
+            className="flex items-center h-9 p-0.5 bg-[#161616] border border-[#2A2A2A] rounded-none"
           >
             <button
               type="button"
@@ -128,11 +127,10 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
               title="List view"
               disabled={isReorderMode}
               onClick={() => onViewModeChange('list')}
-              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                viewMode === 'list'
-                  ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
-                  : 'text-[#7A746B] hover:text-[#F5F0E8]'
-              }`}
+              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === 'list'
+                ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
+                : 'text-[#7A746B] hover:text-[#F5F0E8]'
+                }`}
             >
               <HugeiconsIcon icon={Menu01Icon} className="w-4 h-4" />
             </button>
@@ -144,11 +142,10 @@ export const AdminCollectionsToolbar: React.FC<AdminCollectionsToolbarProps> = (
               title="Collection board view"
               disabled={isReorderMode}
               onClick={() => onViewModeChange('board')}
-              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                viewMode === 'board'
-                  ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
-                  : 'text-[#7A746B] hover:text-[#F5F0E8]'
-              }`}
+              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === 'board'
+                ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
+                : 'text-[#7A746B] hover:text-[#F5F0E8]'
+                }`}
             >
               <HugeiconsIcon icon={LayoutGridIcon} className="w-4 h-4" />
             </button>

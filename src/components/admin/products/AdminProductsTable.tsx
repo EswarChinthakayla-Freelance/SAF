@@ -50,7 +50,7 @@ export const AdminProductsTable: React.FC<AdminProductsTableProps> = ({
               return (
                 <tr
                   key={product.id}
-                  onClick={() => navigate(`/admin/products/${product.id}`)}
+                  onClick={() => navigate(`/admin/products/${product.id}/preview`)}
                   className="hover:bg-[#161616] transition-colors cursor-pointer group"
                 >
                   {/* Product Identity */}

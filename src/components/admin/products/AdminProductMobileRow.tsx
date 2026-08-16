@@ -29,7 +29,7 @@ export const AdminProductMobileRow: React.FC<AdminProductMobileRowProps> = ({
 
   return (
     <div
-      onClick={() => navigate(`/admin/products/${product.id}`)}
+      onClick={() => navigate(`/admin/products/${product.id}/preview`)}
       className="p-4 rounded-none bg-[#141414] border border-[#242424] hover:border-[#383838] active:bg-[#181818] transition-colors space-y-3 cursor-pointer"
     >
       {/* Top row: Thumbnail + Details + Actions */}

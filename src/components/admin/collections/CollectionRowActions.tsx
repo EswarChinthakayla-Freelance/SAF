@@ -61,7 +61,7 @@ export const CollectionRowActions: React.FC<CollectionRowActionsProps> = ({
 
         <DropdownMenuContent
           align="end"
-          className="w-52 bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] shadow-2xl p-1 font-sans rounded-md"
+          className="w-52 bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] shadow-2xl p-1 font-sans rounded-none"
         >
           {/* Edit Details */}
           <DropdownMenuItem

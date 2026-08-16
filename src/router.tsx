@@ -25,6 +25,7 @@ const AdminLoginPage = lazy(() => import('@/pages/admin/AdminLoginPage'))
 const AdminDashboardPage = lazy(() => import('@/pages/admin/AdminDashboardPage'))
 const AdminProductsPage = lazy(() => import('@/pages/admin/AdminProductsPage'))
 const AdminProductNewPage = lazy(() => import('@/pages/admin/AdminProductNewPage'))
+const AdminProductPreviewPage = lazy(() => import('@/pages/admin/AdminProductPreviewPage'))
 const AdminProductEditPage = lazy(() => import('@/pages/admin/AdminProductEditPage'))
 const AdminCollectionsPage = lazy(() => import('@/pages/admin/AdminCollectionsPage'))
 const AdminGalleryPage = lazy(() => import('@/pages/admin/AdminGalleryPage'))
@@ -210,6 +211,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper label="Loading New Product Editor...">
             <AdminProductNewPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: 'products/:id/preview',
+        element: (
+          <SuspenseWrapper label="Loading Product Inspector...">
+            <AdminProductPreviewPage />
           </SuspenseWrapper>
         ),
       },

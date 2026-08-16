@@ -42,7 +42,7 @@ export const AdminCollectionCard: React.FC<AdminCollectionCardProps> = ({
     : null
 
   return (
-    <div className="bg-[#111111] border border-[#242424] hover:border-[#383838] rounded-lg overflow-hidden shadow-sm flex flex-col transition-all duration-200 group font-sans">
+    <div className="bg-[#111111] border border-[#242424] hover:border-[#383838] rounded-none overflow-hidden shadow-sm flex flex-col transition-all duration-200 group font-sans">
       {/* 1. Visual Cover Stage (16:10 Aspect Ratio) */}
       <div className="relative aspect-[16/10] bg-[#161616] overflow-hidden">
         {coverUrl ? (

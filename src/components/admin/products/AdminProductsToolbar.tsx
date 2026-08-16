@@ -72,7 +72,7 @@ export const AdminProductsToolbar: React.FC<AdminProductsToolbarProps> = ({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search by product name or code…"
             aria-label="Search products"
-            className="w-full h-9 bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] text-[#F5F0E8] placeholder:text-[#666158] text-xs sm:text-sm pl-9 pr-9 rounded-md outline-none transition-colors"
+            className="w-full h-9 bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] text-[#F5F0E8] placeholder:text-[#666158] text-xs sm:text-sm pl-9 pr-9 rounded-none outline-none transition-colors"
           />
           {searchQuery && (
             <button
@@ -153,11 +153,10 @@ export const AdminProductsToolbar: React.FC<AdminProductsToolbarProps> = ({
           <button
             type="button"
             onClick={() => setIsFilterSheetOpen(true)}
-            className={`lg:hidden inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-sans font-medium rounded-md border transition-colors cursor-pointer ${
-              activeFiltersCount > 0
+            className={`lg:hidden inline-flex items-center justify-center gap-1.5 h-9 px-3 text-xs font-sans font-medium rounded-none border transition-colors cursor-pointer ${activeFiltersCount > 0
                 ? 'bg-[#181610] text-[#E8B84B] border-[#C9A84C]/40'
                 : 'bg-[#161616] text-[#9B958B] hover:text-[#F5F0E8] border-[#2A2A2A]'
-            }`}
+              }`}
           >
             <HugeiconsIcon icon={FilterIcon} className="w-3.5 h-3.5" />
             <span>Filters</span>
@@ -172,7 +171,7 @@ export const AdminProductsToolbar: React.FC<AdminProductsToolbarProps> = ({
           <div
             role="radiogroup"
             aria-label="Catalogue view switcher"
-            className="flex items-center h-9 p-0.5 bg-[#161616] border border-[#2A2A2A] rounded-md"
+            className="flex items-center h-9 p-0.5 bg-[#161616] border border-[#2A2A2A] rounded-none"
           >
             <button
               type="button"
@@ -181,11 +180,10 @@ export const AdminProductsToolbar: React.FC<AdminProductsToolbarProps> = ({
               aria-label="List view"
               title="List view"
               onClick={() => onViewModeChange('list')}
-              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer ${
-                viewMode === 'list'
+              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer ${viewMode === 'list'
                   ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
                   : 'text-[#7A746B] hover:text-[#F5F0E8]'
-              }`}
+                }`}
             >
               <HugeiconsIcon icon={Menu01Icon} className="w-4 h-4" />
             </button>
@@ -196,11 +194,10 @@ export const AdminProductsToolbar: React.FC<AdminProductsToolbarProps> = ({
               aria-label="Grid view"
               title="Grid view"
               onClick={() => onViewModeChange('grid')}
-              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer ${
-                viewMode === 'grid'
+              className={`h-full px-2.5 rounded flex items-center justify-center transition-all cursor-pointer ${viewMode === 'grid'
                   ? 'bg-[#222222] text-[#E8B84B] shadow-sm'
                   : 'text-[#7A746B] hover:text-[#F5F0E8]'
-              }`}
+                }`}
             >
               <HugeiconsIcon icon={GridViewIcon} className="w-4 h-4" />
             </button>

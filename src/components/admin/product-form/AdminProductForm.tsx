@@ -26,6 +26,7 @@ export interface AdminProductFormProps {
   onUploadImages: (files: File[]) => Promise<ProductImageRow[] | void>
   onCreateTag?: (name: string) => Promise<TagRow>
   isEditing?: boolean
+  cancelHref?: string
 }
 
 export const AdminProductForm: React.FC<AdminProductFormProps> = ({
@@ -36,6 +37,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
   onUploadImages,
   onCreateTag,
   isEditing = false,
+  cancelHref = '/admin/products',
 }) => {
   const [values, setValues] = useState<AdminProductFormValues>(initialValues)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -224,7 +226,7 @@ export const AdminProductForm: React.FC<AdminProductFormProps> = ({
 
           <div className="flex items-center justify-end gap-3 w-full sm:w-auto">
             <Link
-              to="/admin/products"
+              to={cancelHref}
               className="px-4 py-2.5 text-xs text-[#9B958B] hover:text-[#F5F0E8] rounded-none border border-[#2A2A2A] transition-colors"
             >
               Discard Changes

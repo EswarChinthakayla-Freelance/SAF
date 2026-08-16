@@ -338,7 +338,7 @@ export const AdminCollectionsPage: React.FC = () => {
       {isLoading ? (
         /* Loading Skeletons */
         viewMode === 'list' ? (
-          <div className="bg-[#111111] border border-[#242424] rounded-lg p-4 space-y-3">
+          <div className="bg-[#111111] border border-[#242424] rounded-none p-4 space-y-3">
             {[1, 2, 3, 4].map((idx) => (
               <div
                 key={idx}
@@ -351,14 +351,14 @@ export const AdminCollectionsPage: React.FC = () => {
             {[1, 2, 3, 4, 5, 6].map((idx) => (
               <div
                 key={idx}
-                className="h-64 bg-[#111111] border border-[#242424] rounded-lg animate-pulse"
+                className="h-64 bg-[#111111] border border-[#242424] rounded-none animate-pulse"
               />
             ))}
           </div>
         )
       ) : isError ? (
         /* Localized Error State */
-        <div className="p-12 text-center bg-[#111111] border border-[#242424] rounded-lg space-y-3">
+        <div className="p-12 text-center bg-[#111111] border border-[#242424] rounded-none space-y-3">
           <p className="text-xs sm:text-sm text-red-400">
             {error?.message || 'We could not load collections at this time.'}
           </p>
@@ -368,7 +368,7 @@ export const AdminCollectionsPage: React.FC = () => {
         </div>
       ) : isDatabaseEmpty ? (
         /* Empty Database State */
-        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-lg space-y-3">
+        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-none space-y-3">
           <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#7A746B] flex items-center justify-center mx-auto">
             <HugeiconsIcon icon={Layers01Icon} className="w-6 h-6" />
           </div>
@@ -392,7 +392,7 @@ export const AdminCollectionsPage: React.FC = () => {
         </div>
       ) : isNoFilterMatches ? (
         /* No Filter Matches State */
-        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-lg space-y-3">
+        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-none space-y-3">
           <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#7A746B] flex items-center justify-center mx-auto">
             <HugeiconsIcon icon={Search01Icon} className="w-6 h-6" />
           </div>

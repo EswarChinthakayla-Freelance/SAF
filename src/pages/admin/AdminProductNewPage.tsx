@@ -143,7 +143,7 @@ export const AdminProductNewPage: React.FC = () => {
       sort_order: idx,
     }))
 
-    await createProduct.mutateAsync({
+    const created = await createProduct.mutateAsync({
       product: productPayload,
       variants: variantsPayload,
       images: imagesPayload,
@@ -151,7 +151,11 @@ export const AdminProductNewPage: React.FC = () => {
       newUploadedStoragePaths: newUploadedPaths,
     })
 
-    navigate('/admin/products')
+    if (created?.id) {
+      navigate(`/admin/products/${created.id}/preview`)
+    } else {
+      navigate('/admin/products')
+    }
   }
 
   return (

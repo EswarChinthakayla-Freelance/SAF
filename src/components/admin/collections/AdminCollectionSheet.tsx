@@ -193,7 +193,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
             type="button"
             onClick={handleRequestClose}
             aria-label="Close sheet"
-            className="p-1.5 text-[#8A847A] hover:text-[#F5F0E8] hover:bg-[#1E1E1E] rounded-md transition-colors cursor-pointer"
+            className="p-1.5 text-[#8A847A] hover:text-[#F5F0E8] hover:bg-[#1E1E1E] rounded-none transition-colors cursor-pointer"
           >
             <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4" />
           </button>
@@ -228,7 +228,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-6 overflow-y-auto text-xs">
           {errorMessage && (
-            <div className="p-3 bg-red-950/40 border border-red-800/80 text-red-300 text-xs rounded-md flex items-start gap-2">
+            <div className="p-3 bg-red-950/40 border border-red-800/80 text-red-300 text-xs rounded-none flex items-start gap-2">
               <HugeiconsIcon icon={AlertCircleIcon} className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -255,7 +255,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
                 value={formData.name}
                 onChange={handleNameChange}
                 placeholder="e.g. Dining & Banquet"
-                className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-md px-3.5 py-2 text-xs text-[#F5F0E8] placeholder:text-[#666158] outline-none transition-colors"
+                className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-none px-3.5 py-2 text-xs text-[#F5F0E8] placeholder:text-[#666158] outline-none transition-colors"
               />
             </div>
 
@@ -291,7 +291,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
                     setFormData({ ...formData, slug: e.target.value })
                   }}
                   placeholder="dining-banquet"
-                  className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-md pl-24 pr-3 py-2 text-xs text-[#F5F0E8] font-mono placeholder:text-[#666158] outline-none transition-colors"
+                  className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-none pl-24 pr-3 py-2 text-xs text-[#F5F0E8] font-mono placeholder:text-[#666158] outline-none transition-colors"
                 />
               </div>
             </div>
@@ -310,7 +310,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Curated solid wood furniture designed for architectural living spaces..."
-                className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-md p-3 text-xs text-[#F5F0E8] placeholder:text-[#666158] outline-none resize-none leading-relaxed transition-colors"
+                className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-none p-3 text-xs text-[#F5F0E8] placeholder:text-[#666158] outline-none resize-none leading-relaxed transition-colors"
               />
             </div>
           </div>
@@ -323,7 +323,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
 
             {formData.cover_image_path ? (
               <div className="space-y-3">
-                <div className="relative aspect-[16/10] rounded-md overflow-hidden bg-[#161616] border border-[#2A2A2A] group">
+                <div className="relative aspect-[16/10] rounded-none overflow-hidden bg-[#161616] border border-[#2A2A2A] group">
                   <img
                     src={getMediaUrl('brand-assets', formData.cover_image_path, 'card')}
                     alt={formData.cover_image_alt || formData.name}
@@ -333,7 +333,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, cover_image_path: null })}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-950/90 text-red-300 border border-red-800 rounded-md text-xs hover:bg-red-900 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-950/90 text-red-300 border border-red-800 rounded-none text-xs hover:bg-red-900 transition-colors cursor-pointer"
                     >
                       <HugeiconsIcon icon={Delete02Icon} className="w-3.5 h-3.5" />
                       <span>Remove Cover</span>
@@ -360,7 +360,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
                       setFormData({ ...formData, cover_image_alt: e.target.value })
                     }
                     placeholder="e.g. Master teak dining table with natural oil finish"
-                    className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-md px-3.5 py-2 text-xs text-[#F5F0E8] placeholder:text-[#666158] outline-none transition-colors"
+                    className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-none px-3.5 py-2 text-xs text-[#F5F0E8] placeholder:text-[#666158] outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -404,7 +404,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
             </div>
 
             {/* Visibility Toggle */}
-            <div className="flex items-center justify-between p-3.5 bg-[#161616] rounded-md border border-[#262626]">
+            <div className="flex items-center justify-between p-3.5 bg-[#161616] rounded-none border border-[#262626]">
               <div>
                 <div className="font-medium text-[#F5F0E8] text-xs">Public Visibility</div>
                 <div className="text-[11px] text-[#8A847A] mt-0.5">
@@ -444,7 +444,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
                     sort_order: parseInt(e.target.value, 10) || 0,
                   })
                 }
-                className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-md px-3.5 py-2 text-xs text-[#F5F0E8] outline-none transition-colors font-mono"
+                className="w-full bg-[#161616] border border-[#2A2A2A] hover:border-[#383838] focus:border-[#C9A84C] rounded-none px-3.5 py-2 text-xs text-[#F5F0E8] outline-none transition-colors font-mono"
               />
             </div>
           </div>
@@ -458,7 +458,7 @@ export const AdminCollectionSheet: React.FC<AdminCollectionSheetProps> = ({
           <button
             type="button"
             onClick={handleRequestClose}
-            className="px-4 py-2 text-xs font-medium text-[#9B958B] hover:text-[#F5F0E8] rounded-md border border-[#2A2A2A] hover:bg-[#1E1E1E] transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs font-medium text-[#9B958B] hover:text-[#F5F0E8] rounded-none border border-[#2A2A2A] hover:bg-[#1E1E1E] transition-colors cursor-pointer"
           >
             Cancel
           </button>
