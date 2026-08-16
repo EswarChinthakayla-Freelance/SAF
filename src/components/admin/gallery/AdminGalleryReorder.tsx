@@ -78,9 +78,9 @@ export const AdminGalleryReorder: React.FC<AdminGalleryReorderProps> = ({
   return (
     <div className="space-y-4">
       {/* Reorder Action Bar */}
-      <div className="sticky top-16 z-30 bg-[#16140A] border border-[#C9A84C]/50 rounded-lg p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md">
+      <div className="sticky top-16 z-30 bg-[#16140A] border border-[#C9A84C]/50 rounded-none p-4 sm:p-5 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-md bg-[#C9A84C]/15 text-[#E8B84B]">
+          <div className="p-2 rounded-none bg-[#C9A84C]/15 text-[#E8B84B]">
             <HugeiconsIcon icon={Sorting01Icon} className="w-5 h-5" />
           </div>
           <div>
@@ -135,14 +135,13 @@ export const AdminGalleryReorder: React.FC<AdminGalleryReorderProps> = ({
               onDragOver={(e) => handleDragOver(e, idx)}
               onDrop={(e) => handleDrop(e, idx)}
               onDragEnd={() => setDraggedIndex(null)}
-              className={`bg-[#141414] border rounded-lg p-3 flex items-center gap-3 transition-all cursor-grab active:cursor-grabbing select-none ${
-                draggedIndex === idx
-                  ? 'border-[#C9A84C] opacity-50 shadow-lg ring-1 ring-[#C9A84C]'
-                  : 'border-[#242424] hover:border-[#383838]'
-              }`}
+              className={`bg-[#141414] border rounded-none p-3 flex items-center gap-3 transition-all cursor-grab active:cursor-grabbing select-none ${draggedIndex === idx
+                ? 'border-[#C9A84C] opacity-50 shadow-lg ring-1 ring-[#C9A84C]'
+                : 'border-[#242424] hover:border-[#383838]'
+                }`}
             >
               {/* Order Badge */}
-              <div className="flex flex-col items-center justify-center w-8 h-8 rounded-md bg-[#1C1C1C] border border-[#2E2E2E] shrink-0 font-mono text-xs font-bold text-[#C9A84C]">
+              <div className="flex flex-col items-center justify-center w-8 h-8 rounded-none bg-[#1C1C1C] border border-[#2E2E2E] shrink-0 font-mono text-xs font-bold text-[#C9A84C]">
                 #{String(idx + 1).padStart(2, '0')}
               </div>
 

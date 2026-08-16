@@ -49,9 +49,9 @@ export const AdminGalleryGrid: React.FC<AdminGalleryGridProps> = ({
         {Array.from({ length: 8 }).map((_, idx) => (
           <div
             key={idx}
-            className="bg-[#141414] border border-[#242424] rounded-lg overflow-hidden space-y-3 p-3 animate-pulse"
+            className="bg-[#141414] border border-[#242424] rounded-none overflow-hidden space-y-3 p-3 animate-pulse"
           >
-            <div className="aspect-[4/3] bg-[#1C1C1C] rounded-md" />
+            <div className="aspect-[4/3] bg-[#1C1C1C] rounded-none" />
             <div className="space-y-2 pt-1">
               <div className="h-4 bg-[#1F1F1F] rounded w-3/4" />
               <div className="h-3 bg-[#1A1A1A] rounded w-1/2" />
@@ -66,7 +66,7 @@ export const AdminGalleryGrid: React.FC<AdminGalleryGridProps> = ({
   // 2. Localized Error State
   if (isError) {
     return (
-      <div className="bg-[#141414] border border-[#2E2020] rounded-lg p-8 sm:p-12 text-center space-y-4 shadow-lg">
+      <div className="bg-[#141414] border border-[#2E2020] rounded-none p-8 sm:p-12 text-center space-y-4 shadow-lg">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-950/50 border border-red-800/40 text-red-400">
           <HugeiconsIcon icon={AlertCircleIcon} className="w-6 h-6" />
         </div>
@@ -94,7 +94,7 @@ export const AdminGalleryGrid: React.FC<AdminGalleryGridProps> = ({
   // 3. Filter Empty State
   if (images.length === 0 && isFiltered) {
     return (
-      <div className="bg-[#141414] border border-[#242424] rounded-lg p-8 sm:p-12 text-center space-y-4 shadow-lg">
+      <div className="bg-[#141414] border border-[#242424] rounded-none p-8 sm:p-12 text-center space-y-4 shadow-lg">
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2E2E2E] text-[#C9A84C]">
           <HugeiconsIcon icon={FilterIcon} className="w-6 h-6" />
         </div>
@@ -127,7 +127,7 @@ export const AdminGalleryGrid: React.FC<AdminGalleryGridProps> = ({
   // 4. Global Empty State (Zero Gallery Images)
   if (images.length === 0) {
     return (
-      <div className="bg-[#141414] border border-[#242424] rounded-lg p-10 sm:p-16 text-center space-y-4 shadow-lg">
+      <div className="bg-[#141414] border border-[#242424] rounded-none p-10 sm:p-16 text-center space-y-4 shadow-lg">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[#181818] border border-[#282828] text-[#C9A84C]">
           <HugeiconsIcon icon={Image01Icon} className="w-7 h-7" />
         </div>

@@ -40,7 +40,7 @@ export const AdminGalleryToolbar: React.FC<AdminGalleryToolbarProps> = ({
   isFiltered,
 }) => {
   return (
-    <div className="bg-[#111111] border border-[#242424] rounded-lg p-3.5 sm:p-4 space-y-3 shadow-lg">
+    <div className="bg-[#111111] border border-[#242424] rounded-none p-3.5 sm:p-4 space-y-3 shadow-lg">
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Search & Filters */}
         <div className="flex flex-wrap items-center gap-2.5 flex-1">
@@ -55,7 +55,7 @@ export const AdminGalleryToolbar: React.FC<AdminGalleryToolbarProps> = ({
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Search gallery images..."
-              className="w-full h-9 pl-9 pr-8 bg-[#0A0A0A] border border-[#262626] rounded-md text-xs font-sans text-[#F5F0E8] placeholder:text-[#666158] focus:border-[#C9A84C] focus:outline-none transition-colors"
+              className="w-full h-9 pl-9 pr-8 bg-[#0A0A0A] border border-[#262626] rounded-none text-xs font-sans text-[#F5F0E8] placeholder:text-[#666158] focus:border-[#C9A84C] focus:outline-none transition-colors"
             />
             {search && (
               <button

@@ -66,7 +66,7 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
   return (
     <aside className="w-full lg:w-80 xl:w-96 shrink-0 space-y-4 font-sans text-xs">
       {/* Primary Presentation Card */}
-      <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 space-y-4 shadow-lg">
+      <section className="bg-[#141414] border border-[#242424] rounded-none p-5 space-y-4 shadow-lg">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-1.5">
             <HugeiconsIcon icon={Tag01Icon} className="w-3.5 h-3.5" />
@@ -84,12 +84,12 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
 
         {/* Space, Visibility & Order grid */}
         <div className="grid grid-cols-2 gap-2.5 pt-1">
-          <div className="bg-[#181818] border border-[#262626] rounded-md p-2.5 space-y-0.5">
+          <div className="bg-[#181818] border border-[#262626] rounded-none p-2.5 space-y-0.5">
             <span className="text-[10px] font-mono uppercase text-[#7A746B]">Room Space</span>
             <p className="text-xs font-semibold text-[#F5F0E8]">{image.room_type || 'Living Room'}</p>
           </div>
 
-          <div className="bg-[#181818] border border-[#262626] rounded-md p-2.5 space-y-0.5">
+          <div className="bg-[#181818] border border-[#262626] rounded-none p-2.5 space-y-0.5">
             <span className="text-[10px] font-mono uppercase text-[#7A746B]">Display Order</span>
             <p className="text-xs font-semibold font-mono text-[#C9A84C]">
               Order #{String(image.sort_order ?? 0).padStart(2, '0')}
@@ -103,11 +103,11 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
             Accessibility Caption / Alt
           </span>
           {hasAlt ? (
-            <p className="text-xs font-sans text-[#F5F0E8] bg-[#181818] border border-[#262626] rounded-md p-3 leading-relaxed whitespace-pre-wrap">
+            <p className="text-xs font-sans text-[#F5F0E8] bg-[#181818] border border-[#262626] rounded-none p-3 leading-relaxed whitespace-pre-wrap">
               {image.alt_text}
             </p>
           ) : (
-            <div className="p-3 rounded-md bg-[#1C1708] border border-[#B45309]/40 space-y-2">
+            <div className="p-3 rounded-none bg-[#1C1708] border border-[#B45309]/40 space-y-2">
               <div className="flex items-center gap-1.5 text-xs text-[#F59E0B] font-medium">
                 <HugeiconsIcon icon={AlertCircleIcon} className="w-4 h-4 text-[#F59E0B]" />
                 <span>No description has been added</span>
@@ -130,7 +130,7 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
       </section>
 
       {/* Connected Furniture Catalogue Piece */}
-      <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 space-y-3 shadow-lg">
+      <section className="bg-[#141414] border border-[#242424] rounded-none p-5 space-y-3 shadow-lg">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-1.5">
             <HugeiconsIcon icon={PackageIcon} className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
         </div>
 
         {linkedProduct ? (
-          <div className="bg-[#181818] border border-[#2A2A2A] rounded-md p-3 space-y-3">
+          <div className="bg-[#181818] border border-[#2A2A2A] rounded-none p-3 space-y-3">
             <div className="flex items-center gap-3">
               {/* Product Thumbnail */}
               <div className="relative w-12 h-12 rounded bg-[#0E0E0E] overflow-hidden shrink-0 border border-[#2E2E2E]">
@@ -187,7 +187,7 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
             </div>
           </div>
         ) : (
-          <div className="p-3 bg-[#181818] border border-[#262626] rounded-md space-y-2 text-center">
+          <div className="p-3 bg-[#181818] border border-[#262626] rounded-none space-y-2 text-center">
             <p className="text-xs text-[#7A746B]">No catalogue furniture piece linked to this photo.</p>
             <Button
               type="button"
@@ -204,7 +204,7 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
       </section>
 
       {/* Public Gallery Readiness Checklist */}
-      <section className="bg-[#141414] border border-[#242424] rounded-lg p-5 space-y-3 shadow-lg">
+      <section className="bg-[#141414] border border-[#242424] rounded-none p-5 space-y-3 shadow-lg">
         <h3 className="text-xs font-mono font-semibold uppercase tracking-wider text-[#C9A84C] flex items-center gap-1.5">
           <HugeiconsIcon icon={SparklesIcon} className="w-3.5 h-3.5" />
           <span>Public Gallery Readiness</span>
@@ -227,11 +227,10 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
                 <div className="text-[10px] text-[#7A746B]">{check.detail}</div>
               </div>
               <span
-                className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded ${
-                  check.isReady
-                    ? 'bg-[#0D1510] text-[#4ADE80] border border-[#22C55E]/30'
-                    : 'bg-[#1C1708] text-[#F59E0B] border border-[#B45309]/30'
-                }`}
+                className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded ${check.isReady
+                  ? 'bg-[#0D1510] text-[#4ADE80] border border-[#22C55E]/30'
+                  : 'bg-[#1C1708] text-[#F59E0B] border border-[#B45309]/30'
+                  }`}
               >
                 {check.status}
               </span>
@@ -241,7 +240,7 @@ export const GalleryMetadataPanel: React.FC<GalleryMetadataPanelProps> = ({
       </section>
 
       {/* Technical Details Accordion */}
-      <section className="bg-[#141414] border border-[#242424] rounded-lg overflow-hidden shadow-lg">
+      <section className="bg-[#141414] border border-[#242424] rounded-none overflow-hidden shadow-lg">
         <button
           type="button"
           onClick={() => setShowTechnicalDetails((prev) => !prev)}
