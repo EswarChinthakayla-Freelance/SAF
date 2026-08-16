@@ -219,7 +219,7 @@ export const AdminInquiriesPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans">
+    <div className="space-y-6 w-full max-w-[1600px] mx-auto pb-16 font-sans">
       <PageMeta
         title="Inquiries | Sri Anjaneya Furnitures Admin"
         description="Review customer quote and contact enquiries, manage status workflows and record consultation notes."
@@ -290,7 +290,7 @@ export const AdminInquiriesPage: React.FC = () => {
           </div>
         ) : isError ? (
           /* Error State */
-          <div className="p-8 text-center bg-[#141010] border border-red-900/30 rounded-lg space-y-3">
+          <div className="p-8 text-center bg-[#141010] border border-red-900/30 rounded-none space-y-3">
             <div className="w-10 h-10 rounded-full bg-red-950/60 border border-red-800/40 text-red-400 mx-auto flex items-center justify-center">
               <HugeiconsIcon icon={AlertCircleIcon} className="w-5 h-5" />
             </div>
@@ -314,7 +314,7 @@ export const AdminInquiriesPage: React.FC = () => {
           </div>
         ) : inquiriesList.length === 0 ? (
           /* Empty States */
-          <div className="p-12 text-center bg-[#0F0F0F] border border-[#222222] rounded-lg space-y-3">
+          <div className="p-12 text-center bg-[#0F0F0F] border border-[#222222] rounded-none space-y-3">
             <div className="w-12 h-12 rounded-full bg-[#161616] border border-[#2A2A2A] text-[#C9A84C] mx-auto flex items-center justify-center">
               {debouncedSearch ? (
                 <HugeiconsIcon icon={Search01Icon} className="w-6 h-6" />
@@ -328,15 +328,15 @@ export const AdminInquiriesPage: React.FC = () => {
                 {debouncedSearch
                   ? `No enquiries match “${debouncedSearch}”`
                   : activeStatus !== 'all'
-                  ? `No ${activeStatus} enquiries`
-                  : 'No enquiries yet'}
+                    ? `No ${activeStatus} enquiries`
+                    : 'No enquiries yet'}
               </h2>
               <p className="text-xs text-[#8A847A] max-w-sm mx-auto">
                 {debouncedSearch
                   ? 'Try checking for spelling errors or searching with a different contact name, email, or phone number.'
                   : activeStatus !== 'all'
-                  ? `There are currently no enquiries marked with status “${activeStatus}”.`
-                  : 'New customer quote and bespoke consultation enquiries will appear here.'}
+                    ? `There are currently no enquiries marked with status “${activeStatus}”.`
+                    : 'New customer quote and bespoke consultation enquiries will appear here.'}
               </p>
             </div>
 

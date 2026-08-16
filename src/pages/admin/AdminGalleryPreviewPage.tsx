@@ -195,7 +195,7 @@ export const AdminGalleryPreviewPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4 max-w-7xl mx-auto pb-16 font-sans">
+    <div className="space-y-4 w-full max-w-[1600px] mx-auto pb-16 font-sans">
       <PageMeta
         title={`${image.room_type || 'Image'} Inspector | Sri Anjaneya Furnitures Admin`}
         description="Inspect high-resolution inspiration imagery, room metadata and catalogue product linking."

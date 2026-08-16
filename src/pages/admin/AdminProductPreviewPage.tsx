@@ -87,7 +87,7 @@ export const AdminProductPreviewPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8 pb-20 max-w-7xl mx-auto">
+    <div className="space-y-8 pb-20 w-full max-w-[1600px] mx-auto">
       {/* 1. Header with Breadcrumb, H1 Title, Status Badge, and Primary Actions */}
       <AdminProductPreviewHeader
         product={product}

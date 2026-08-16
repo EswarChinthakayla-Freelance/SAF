@@ -116,7 +116,7 @@ export const AdminGalleryPage: React.FC = () => {
   const totalPages = galleryData?.totalPages ?? 1
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-16 font-sans">
+    <div className="space-y-6 w-full max-w-[1600px] mx-auto pb-16 font-sans">
       <PageMeta
         title="Gallery Management | Sri Anjaneya Furnitures Admin"
         description="Admin visual media studio for inspiration gallery, room taxonomy and catalogue product links."

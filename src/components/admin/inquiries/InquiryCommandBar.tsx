@@ -56,7 +56,7 @@ export const InquiryCommandBar: React.FC<InquiryCommandBarProps> = ({
   return (
     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
       {/* Search Input Box */}
-      <div className="relative flex-1 max-w-md">
+      <div className="relative flex-1 max-w-xl">
         <HugeiconsIcon
           icon={Search01Icon}
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7A746B] pointer-events-none"
@@ -96,7 +96,7 @@ export const InquiryCommandBar: React.FC<InquiryCommandBarProps> = ({
           >
             <SelectTrigger
               aria-label="Sort order"
-              className="h-9 w-[136px] bg-[#141414] border-[#2A2A2A] text-[#D1CCC2] hover:text-[#F5F0E8] text-xs font-sans rounded px-2.5"
+              className="h-9 w-[150px] bg-[#141414] border-[#2A2A2A] text-[#D1CCC2] hover:text-[#F5F0E8] text-xs font-sans rounded px-3"
             >
               <HugeiconsIcon icon={Sorting01Icon} className="w-3.5 h-3.5 mr-1.5 text-[#C9A84C] shrink-0" />
               <SelectValue placeholder="Sort">
