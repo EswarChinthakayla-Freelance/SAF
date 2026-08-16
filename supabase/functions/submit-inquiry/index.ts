@@ -18,19 +18,21 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 interface InquiryPayload {
-  customer_name: string
-  customer_email: string
+  name?: string
+  customer_name?: string
+  email?: string
+  customer_email?: string
+  phone?: string | null
   customer_phone?: string | null
-  preferred_contact_method?: string
   product_id?: string | null
-  variant_id?: string | null
-  message: string
-  room_type?: string | null
-  estimated_budget?: string | null
-  website?: string // Honeypot field - must be empty!
+  subject?: string | null
+  message?: string
+  honeypot?: string
+  website?: string
   turnstile_token?: string
 }
 
@@ -51,7 +53,8 @@ serve(async (req: Request) => {
     const body: InquiryPayload = await req.json()
 
     // 1. Honeypot check for bots
-    if (body.website && body.website.trim().length > 0) {
+    const honeypotVal = (body.honeypot || body.website || '').trim()
+    if (honeypotVal.length > 0) {
       console.warn('[Inquiry Warning]: Honeypot triggered, dropping submission quietly.')
       return new Response(
         JSON.stringify({ success: true, message: 'Inquiry received' }),
@@ -59,8 +62,16 @@ serve(async (req: Request) => {
       )
     }
 
+    // Extract unified fields
+    const name = (body.name || body.customer_name || '').trim()
+    const email = (body.email || body.customer_email || '').trim().toLowerCase()
+    const phone = (body.phone || body.customer_phone || '').trim() || null
+    const subject = (body.subject || '').trim() || null
+    const message = (body.message || '').trim()
+    const productId = body.product_id || null
+
     // 2. Strict Server-Side Validation
-    if (!body.customer_name || body.customer_name.trim().length < 2) {
+    if (!name || name.length < 2) {
       return new Response(
         JSON.stringify({ error: 'Name must be at least 2 characters' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -68,14 +79,14 @@ serve(async (req: Request) => {
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!body.customer_email || !emailRegex.test(body.customer_email)) {
+    if (!email || !emailRegex.test(email)) {
       return new Response(
         JSON.stringify({ error: 'A valid email address is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    if (!body.message || body.message.trim().length < 5) {
+    if (!message || message.length < 5) {
       return new Response(
         JSON.stringify({ error: 'Message must be at least 5 characters' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -124,16 +135,14 @@ serve(async (req: Request) => {
     const { data: inquiryData, error: dbError } = await supabaseAdmin
       .from('inquiries')
       .insert({
-        customer_name: body.customer_name.trim(),
-        customer_email: body.customer_email.trim().toLowerCase(),
-        customer_phone: body.customer_phone ? body.customer_phone.trim() : null,
-        preferred_contact_method: body.preferred_contact_method || 'email',
-        product_id: body.product_id || null,
-        variant_id: body.variant_id || null,
-        message: body.message.trim(),
-        room_type: body.room_type || null,
-        estimated_budget: body.estimated_budget || null,
+        name,
+        email,
+        phone,
+        product_id: productId,
+        subject,
+        message,
         status: 'new', // Authoritatively set by server
+        source: 'website',
         admin_notes: null,
       })
       .select('id')
@@ -149,7 +158,7 @@ serve(async (req: Request) => {
 
     // 6. Secondary Notification: Send email via Resend if configured
     const resendApiKey = Deno.env.get('RESEND_API_KEY')
-    const notifyEmail = Deno.env.get('RESEND_NOTIFICATION_EMAIL') || 'admin@srianjaneyafurnitures.com'
+    const notifyEmail = Deno.env.get('RESEND_NOTIFICATION_EMAIL') || 'srianjaneyafurniturestallur@gmail.com'
     const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') || 'inquiries@srianjaneyafurnitures.com'
 
     if (resendApiKey) {
@@ -163,19 +172,17 @@ serve(async (req: Request) => {
           body: JSON.stringify({
             from: `Sri Anjaneya Furnitures <${fromEmail}>`,
             to: [notifyEmail],
-            subject: `[New Quote Request - Sri Anjaneya Furnitures] from ${body.customer_name.trim()}`,
+            subject: `[New Quote Request - Sri Anjaneya Furnitures] from ${name}`,
             html: `
               <h2>New Quote Request — Sri Anjaneya Furnitures</h2>
-              <p><strong>Customer:</strong> ${body.customer_name.trim()}</p>
-              <p><strong>Email:</strong> ${body.customer_email.trim()}</p>
-              <p><strong>Phone:</strong> ${body.customer_phone || 'N/A'}</p>
-              <p><strong>Preferred Contact:</strong> ${body.preferred_contact_method || 'email'}</p>
-              <p><strong>Room Type:</strong> ${body.room_type || 'N/A'}</p>
-              <p><strong>Estimated Budget:</strong> ${body.estimated_budget || 'N/A'}</p>
+              <p><strong>Customer Name:</strong> ${name}</p>
+              <p><strong>Email Address:</strong> ${email}</p>
+              <p><strong>Phone / WhatsApp:</strong> ${phone || 'N/A'}</p>
+              <p><strong>Subject:</strong> ${subject || 'General Design Brief'}</p>
               <hr />
-              <p><strong>Message:</strong></p>
-              <p>${body.message.trim().replace(/\n/g, '<br/>')}</p>
-              <p><small>Inquiry ID: ${inquiryData.id}</small></p>
+              <p><strong>Requirements & Message:</strong></p>
+              <p>${message.replace(/\n/g, '<br/>')}</p>
+              <p><small>Inquiry Reference ID: ${inquiryData.id}</small></p>
             `,
           }),
         })
@@ -195,7 +202,7 @@ serve(async (req: Request) => {
       JSON.stringify({
         success: true,
         inquiry_id: inquiryData.id,
-        message: 'Your inquiry has been submitted successfully. Our design team will contact you shortly.',
+        message: 'Your design brief has been submitted successfully. Our design team will contact you shortly.',
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
