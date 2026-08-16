@@ -4,6 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
+import type { InquiryRow } from '@/types/app'
 
 const mockMetrics = {
   totalProducts: 24,
@@ -12,7 +13,7 @@ const mockMetrics = {
   newInquiries7Days: 8,
 }
 
-const mockRecentInquiries = [
+const mockRecentInquiries: InquiryRow[] = [
   {
     id: 'inq-1',
     name: 'Anandha Varma',
@@ -22,7 +23,7 @@ const mockRecentInquiries = [
     subject: 'Custom Teak Dining Set',
     message: 'Need 8-seater table with brass accents and custom matching chairs.',
     status: 'new',
-    source: 'web',
+    source: 'website',
     admin_notes: null,
     replied_at: null,
     created_at: '2026-08-15T10:00:00Z',
@@ -30,13 +31,17 @@ const mockRecentInquiries = [
   },
 ]
 
+const mockRefetchMetrics = vi.fn()
+const mockRefetchInquiries = vi.fn()
+
 vi.mock('@/hooks/queries/useDashboard', () => ({
   useDashboardMetrics: () => ({
     data: mockMetrics,
     isLoading: false,
     isError: false,
     error: null,
-    refetch: vi.fn(),
+    refetch: mockRefetchMetrics,
+    isFetching: false,
   }),
 }))
 
@@ -46,7 +51,14 @@ vi.mock('@/hooks/queries/useInquiries', () => ({
     isLoading: false,
     isError: false,
     error: null,
-    refetch: vi.fn(),
+    refetch: mockRefetchInquiries,
+    isFetching: false,
+  }),
+  useInquiryDetail: (id?: string) => ({
+    data: id === 'inq-1' ? mockRecentInquiries[0] : null,
+    isLoading: false,
+    isError: false,
+    error: null,
   }),
 }))
 
@@ -73,12 +85,21 @@ const renderDashboard = () => {
   )
 }
 
-describe('AdminDashboardPage Component', () => {
+describe('AdminDashboardPage Component — "The Operations Desk"', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders 4 required KPI stat cards with correct metrics', () => {
+  it('renders compact header with Add Product and View Website actions', () => {
+    renderDashboard()
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Dashboard' })).toBeDefined()
+    expect(screen.getByText('Manage your catalogue, gallery and customer enquiries from one place.')).toBeDefined()
+    expect(screen.getByRole('button', { name: /Add Product/i })).toBeDefined()
+    expect(screen.getByText('View Website')).toBeDefined()
+  })
+
+  it('renders 4 required KPI stat cards with correct values and navigation links', () => {
     renderDashboard()
 
     expect(screen.getByText('Total Products')).toBeDefined()
@@ -92,32 +113,46 @@ describe('AdminDashboardPage Component', () => {
 
     expect(screen.getByText('New Inquiries')).toBeDefined()
     expect(screen.getByText('8')).toBeDefined()
+    expect(screen.getByText('Needs attention')).toBeDefined()
   })
 
-  it('renders recent inquiries table with customer details and status badge', () => {
+  it('renders Attention panel and compact Quick Actions list', () => {
     renderDashboard()
 
-    expect(screen.getByText('Anandha Varma')).toBeDefined()
-    expect(screen.getByText('anandha@example.com')).toBeDefined()
-    expect(screen.getByText('Custom Teak Dining Set')).toBeDefined()
-    expect(screen.getByText('New')).toBeDefined()
+    expect(screen.getByRole('heading', { level: 2, name: 'Attention' })).toBeDefined()
+    expect(screen.getByText(/8 new enquiries awaiting response/i)).toBeDefined()
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Quick Actions' })).toBeDefined()
+    expect(screen.getAllByText('Add Product').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getByText('Review Inquiries')).toBeDefined()
+    expect(screen.getByText('Upload Gallery Images')).toBeDefined()
+    expect(screen.getByText('Manage Collections')).toBeDefined()
+    expect(screen.getByText('Brand Settings')).toBeDefined()
   })
 
-  it('opens InquiryDetailSheet when Inspect button or row is clicked', () => {
+  it('renders recent inquiries with customer details, status, and opens detail sheet on View', () => {
     renderDashboard()
 
-    const inspectBtn = screen.getByRole('button', { name: /Inspect/i })
-    fireEvent.click(inspectBtn)
+    expect(screen.getByRole('heading', { level: 2, name: 'Recent Inquiries' })).toBeDefined()
+    expect(screen.getAllByText('Anandha Varma')[0]).toBeDefined()
+    expect(screen.getAllByText('anandha@example.com')[0]).toBeDefined()
+    expect(screen.getAllByText('Custom Teak Dining Set')[0]).toBeDefined()
+    expect(screen.getAllByText('New')[0]).toBeDefined()
+
+    const viewBtn = screen.getByRole('button', { name: /View inquiry from Anandha Varma/i })
+    fireEvent.click(viewBtn)
 
     expect(screen.getByText('Customer Message')).toBeDefined()
     expect(screen.getByText(/Need 8-seater table with brass accents/i)).toBeDefined()
   })
 
-  it('renders quick action shortcuts to catalogue, inquiries, and gallery', () => {
+  it('triggers manual refresh when refresh button is clicked', () => {
     renderDashboard()
 
-    expect(screen.getByText('Add Catalogue Piece')).toBeDefined()
-    expect(screen.getByText('Review Quote Inquiries')).toBeDefined()
-    expect(screen.getByText('Inspiration Gallery')).toBeDefined()
+    const refreshBtn = screen.getByRole('button', { name: 'Refresh dashboard data' })
+    fireEvent.click(refreshBtn)
+
+    expect(mockRefetchMetrics).toHaveBeenCalled()
+    expect(mockRefetchInquiries).toHaveBeenCalled()
   })
 })
