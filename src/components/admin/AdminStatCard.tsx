@@ -31,11 +31,9 @@ export const AdminStatCard: React.FC<AdminStatCardProps> = ({
 }) => {
   const content = (
     <div
-      className={`group relative bg-[#111111] border ${
-        needsAttention ? 'border-[#C9A84C]/50 bg-[#141310]' : 'border-[#242424] hover:border-[#383838]'
-      } rounded-lg p-5 flex flex-col justify-between transition-all duration-200 shadow-sm ${
-        href ? 'cursor-pointer hover:bg-[#151515]' : ''
-      } ${className}`}
+      className={`group relative bg-[#111111] border ${needsAttention ? 'border-[#C9A84C]/50 bg-[#141310]' : 'border-[#242424] hover:border-[#383838]'
+        } rounded-none p-5 flex flex-col justify-between transition-all duration-200 shadow-sm ${href ? 'cursor-pointer hover:bg-[#151515]' : ''
+        } ${className}`}
     >
       {/* Top row: Label & Icon */}
       <div className="flex items-center justify-between gap-2">
@@ -44,11 +42,10 @@ export const AdminStatCard: React.FC<AdminStatCardProps> = ({
         </span>
         {icon && (
           <div
-            className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${
-              needsAttention
+            className={`w-8 h-8 rounded flex items-center justify-center shrink-0 ${needsAttention
                 ? 'bg-[#C9A84C]/15 text-[#E8B84B] border border-[#C9A84C]/30'
                 : 'bg-[#1A1A1A] text-[#9B958B] border border-[#2A2A2A]'
-            }`}
+              }`}
           >
             {icon}
           </div>
@@ -72,9 +69,8 @@ export const AdminStatCard: React.FC<AdminStatCardProps> = ({
             </span>
           ) : trend ? (
             <span
-              className={`font-semibold font-mono text-[11px] ${
-                trend.isPositive ? 'text-emerald-400' : 'text-amber-400'
-              }`}
+              className={`font-semibold font-mono text-[11px] ${trend.isPositive ? 'text-emerald-400' : 'text-amber-400'
+                }`}
             >
               {trend.value}
             </span>
@@ -99,7 +95,7 @@ export const AdminStatCard: React.FC<AdminStatCardProps> = ({
       <Link
         to={href}
         aria-label={`${label}: ${value}. ${context || attentionLabel || ''}`}
-        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] rounded-lg"
+        className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] rounded-none"
       >
         {content}
       </Link>

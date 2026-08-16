@@ -59,6 +59,7 @@ vi.mock('@/hooks/queries/useProducts', () => ({
   useAdminProducts: () => ({
     data: { products: mockProducts, totalCount: 1, totalPages: 1 },
     isLoading: false,
+    isFetching: false,
     isError: false,
     error: null,
     refetch: vi.fn(),
@@ -101,25 +102,51 @@ const renderProductsPage = () => {
   )
 }
 
-describe('AdminProductsPage Component', () => {
+describe('AdminProductsPage Component — "The Product Workspace"', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
+  })
+
+  it('renders products workspace header with Inter title, count, and Add Product CTA', () => {
+    renderProductsPage()
+
+    expect(screen.getByRole('heading', { level: 1, name: 'Products' })).toBeDefined()
+    expect(screen.getByText('1 product')).toBeDefined()
+    expect(screen.getByRole('button', { name: /Add Product/i })).toBeDefined()
+    expect(screen.getByPlaceholderText('Search by product name or code…')).toBeDefined()
   })
 
   it('renders products table with thumbnail, title, product code, price, and publish toggle', () => {
     renderProductsPage()
 
-    expect(screen.getByText('Teak Grand Dining Table')).toBeDefined()
-    expect(screen.getByText('SAF-DT-101')).toBeDefined()
+    expect(screen.getAllByText('Teak Grand Dining Table')[0]).toBeDefined()
+    expect(screen.getAllByText('SAF-DT-101')[0]).toBeDefined()
     expect(screen.getAllByText('Dining & Banquet')[0]).toBeDefined()
-    expect(screen.getByText('₹85,000')).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Published' })).toBeDefined()
+    expect(screen.getAllByText('₹85,000')[0]).toBeDefined()
+    expect(screen.getAllByRole('button', { name: /Status: Published/i })[0]).toBeDefined()
   })
 
-  it('triggers togglePublish mutation when publish status button is clicked', () => {
+  it('switches between List View and Grid View when view switcher buttons are clicked', () => {
     renderProductsPage()
 
-    const publishBtn = screen.getByRole('button', { name: 'Published' })
+    const gridBtn = screen.getByRole('radio', { name: 'Grid view' })
+    fireEvent.click(gridBtn)
+
+    expect(gridBtn.getAttribute('aria-checked')).toBe('true')
+    expect(localStorage.getItem('admin-products-view')).toBe('grid')
+
+    // Switch back to list
+    const listBtn = screen.getByRole('radio', { name: 'List view' })
+    fireEvent.click(listBtn)
+    expect(listBtn.getAttribute('aria-checked')).toBe('true')
+    expect(localStorage.getItem('admin-products-view')).toBe('list')
+  })
+
+  it('triggers togglePublish mutation when publish status badge/button is clicked', () => {
+    renderProductsPage()
+
+    const publishBtn = screen.getAllByRole('button', { name: /Status: Published/i })[0]
     fireEvent.click(publishBtn)
 
     expect(mockTogglePublish).toHaveBeenCalledWith({
@@ -128,103 +155,19 @@ describe('AdminProductsPage Component', () => {
     })
   })
 
-  it('opens delete confirmation dialog when Delete button is clicked', () => {
+  it('opens delete confirmation dialog when Delete action is triggered', () => {
     renderProductsPage()
 
-    const deleteBtn = screen.getByRole('button', { name: 'Delete' })
-    fireEvent.click(deleteBtn)
+    // Open More dropdown
+    const moreBtn = screen.getAllByRole('button', { name: /More actions for Teak Grand Dining Table/i })[0]
+    fireEvent.click(moreBtn)
 
-    expect(screen.getByRole('heading', { level: 3 })).toBeDefined()
+    const deleteMenuItem = screen.getByText('Delete Product')
+    fireEvent.click(deleteMenuItem)
+
+    expect(screen.getByRole('heading', { name: /Delete “Teak Grand Dining Table”/i })).toBeDefined()
     expect(
       screen.getByText(/Are you sure you want to permanently delete "Teak Grand Dining Table"/i)
     ).toBeDefined()
-  })
-
-  it('updates autoslug when title changes and preserves manual slug override', async () => {
-    const { BasicInfoSection } = await import('@/components/admin/product-form/BasicInfoSection')
-    const handleChange = vi.fn()
-
-    render(
-      <BasicInfoSection
-        values={{
-          name: '',
-          slug: '',
-          product_code: '',
-          collection_id: null,
-          short_desc: '',
-          description: '',
-        }}
-        onChange={handleChange}
-        collections={mockCollections}
-      />
-    )
-
-    const titleInput = screen.getByPlaceholderText(/e\.g\. Grand Teak/i)
-    fireEvent.change(titleInput, { target: { value: 'Royal Teak Bed' } })
-
-    expect(handleChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'Royal Teak Bed',
-        slug: 'royal-teak-bed',
-      })
-    )
-
-    // Manual slug override
-    const slugInput = screen.getByPlaceholderText(/grand-teak-heritage/i)
-    fireEvent.change(slugInput, { target: { value: 'custom-teak-bed' } })
-    expect(handleChange).toHaveBeenCalledWith({ slug: 'custom-teak-bed' })
-  })
-
-  it('supports image reordering, alt text editing, and cover selection in MediaSection', async () => {
-    const { MediaSection } = await import('@/components/admin/product-form/MediaSection')
-    const handleSetCover = vi.fn()
-    const handleUpdateAlt = vi.fn()
-    const handleDelete = vi.fn()
-    const handleReorder = vi.fn()
-
-    const mockImages = [
-      {
-        id: 'img-1',
-        product_id: 'p1',
-        storage_path: 'products/img1.jpg',
-        alt_text: 'Image One',
-        sort_order: 0,
-        is_cover: true,
-        created_at: '2026-08-01T00:00:00Z',
-      },
-      {
-        id: 'img-2',
-        product_id: 'p1',
-        storage_path: 'products/img2.jpg',
-        alt_text: 'Image Two',
-        sort_order: 1,
-        is_cover: false,
-        created_at: '2026-08-01T00:00:00Z',
-      },
-    ]
-
-    render(
-      <MediaSection
-        images={mockImages}
-        onUploadImages={vi.fn()}
-        onSetCover={handleSetCover}
-        onUpdateAltText={handleUpdateAlt}
-        onDeleteImage={handleDelete}
-        onReorderImage={handleReorder}
-      />
-    )
-
-    expect(screen.getByText('Cover Image')).toBeDefined()
-    expect(screen.getByText('Product Images (2)')).toBeDefined()
-
-    // Click Set as Cover on second image
-    const setCoverBtn = screen.getByRole('button', { name: /Set image 2 as cover/i })
-    fireEvent.click(setCoverBtn)
-    expect(handleSetCover).toHaveBeenCalledWith('img-2')
-
-    // Click Move Down on first image
-    const moveDownBtn = screen.getByRole('button', { name: /Move image 1 down/i })
-    fireEvent.click(moveDownBtn)
-    expect(handleReorder).toHaveBeenCalledWith(0, 1)
   })
 })

@@ -28,7 +28,7 @@ export const RecentInquiries: React.FC<RecentInquiriesProps> = ({
   onSelectInquiry,
 }) => {
   return (
-    <div className="bg-[#111111] border border-[#242424] rounded-lg overflow-hidden shadow-sm">
+    <div className="bg-[#111111] border border-[#242424] rounded-none overflow-hidden shadow-sm">
       {/* Section Header */}
       <div className="px-5 sm:px-6 py-4 border-b border-[#222222] flex items-center justify-between gap-4 bg-[#141414]">
         <div className="space-y-0.5">

@@ -53,7 +53,7 @@ export const AdminQuickActions: React.FC<{ className?: string }> = ({ className 
 
   return (
     <div
-      className={`bg-[#111111] border border-[#242424] rounded-lg p-5 flex flex-col justify-between shadow-sm ${className}`}
+      className={`bg-[#111111] border border-[#242424] rounded-none p-5 flex flex-col justify-between shadow-sm ${className}`}
     >
       <div className="space-y-3">
         {/* Panel Header */}

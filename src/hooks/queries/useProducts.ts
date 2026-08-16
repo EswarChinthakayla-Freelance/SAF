@@ -442,6 +442,12 @@ export function useAdminProducts(filters: ProductListFilters = {}) {
         query = query.eq('collection_id', filters.collectionId)
       }
 
+      if (filters.status === 'published' || filters.isPublished === true) {
+        query = query.eq('is_published', true)
+      } else if (filters.status === 'draft' || filters.isPublished === false) {
+        query = query.eq('is_published', false)
+      }
+
       if (filters.searchQuery && filters.searchQuery.trim().length > 0) {
         const term = filters.searchQuery.trim()
         query = query.or(`name.ilike.%${term}%,product_code.ilike.%${term}%`)

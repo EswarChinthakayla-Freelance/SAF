@@ -24,7 +24,7 @@ export const DashboardAttention: React.FC<DashboardAttentionProps> = ({
 
   return (
     <div
-      className={`bg-[#111111] border border-[#242424] rounded-lg p-5 flex flex-col justify-between shadow-sm ${className}`}
+      className={`bg-[#111111] border border-[#242424] rounded-none p-5 flex flex-col justify-between shadow-sm ${className}`}
     >
       <div className="space-y-4">
         {/* Panel Header */}
@@ -32,9 +32,8 @@ export const DashboardAttention: React.FC<DashboardAttentionProps> = ({
           <div className="flex items-center gap-2">
             <HugeiconsIcon
               icon={hasItemsNeedingAttention ? Notification02Icon : CheckmarkCircle02Icon}
-              className={`w-4 h-4 ${
-                hasItemsNeedingAttention ? 'text-[#E8B84B]' : 'text-emerald-400'
-              }`}
+              className={`w-4 h-4 ${hasItemsNeedingAttention ? 'text-[#E8B84B]' : 'text-emerald-400'
+                }`}
             />
             <h2 className="text-xs font-semibold font-sans uppercase tracking-wider text-[#F5F0E8]">
               Attention

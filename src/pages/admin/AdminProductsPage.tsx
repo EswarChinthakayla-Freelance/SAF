@@ -1,67 +1,124 @@
-import React, { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { PageHeader } from '@/components/common/PageHeader'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { AdminDataTable, type Column } from '@/components/admin/AdminDataTable'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { AdminProductsToolbar, type ViewMode } from '@/components/admin/products/AdminProductsToolbar'
+import { AdminProductsTable } from '@/components/admin/products/AdminProductsTable'
+import { AdminProductGrid } from '@/components/admin/products/AdminProductGrid'
+import { AdminProductsPagination } from '@/components/admin/products/AdminProductsPagination'
 import { ConfirmDeleteDialog } from '@/components/common/ConfirmDeleteDialog'
 import { GoldButton } from '@/components/brand/GoldButton'
 import { useAdminProducts } from '@/hooks/queries/useProducts'
 import { useCollections } from '@/hooks/queries/useCollections'
 import { useProductMutations } from '@/hooks/mutations/useProductMutations'
-import { formatCurrency } from '@/utils/formatCurrency'
-import { formatDate } from '@/utils/dates'
-import { getMediaUrl } from '@/lib/media'
 import { SEARCH_CONSTRAINTS } from '@/lib/constants'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  PlusSignIcon,
+  PackageIcon,
+  Search01Icon,
+  RefreshIcon,
+} from '@hugeicons/core-free-icons'
 import type { ProductListItem } from '@/types/app'
 
+const STORAGE_VIEW_KEY = 'admin-products-view'
+
+/**
+ * AdminProductsPage — "The Product Workspace"
+ * Clean, fast catalogue management with List / Grid switcher,
+ * URL-synced filtering, responsive cards, and safe publication actions.
+ */
 export const AdminProductsPage: React.FC = () => {
-  const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Filter States
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('')
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'published' | 'draft'>('all')
-  const [page, setPage] = useState(1)
+  // 1. View Mode Persistence (Local Storage only, excluded from server query)
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_VIEW_KEY)
+      if (saved === 'grid' || saved === 'list') return saved
+    } catch {
+      // Fallback
+    }
+    return 'list'
+  })
 
-  // Delete Dialog State
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode)
+    try {
+      localStorage.setItem(STORAGE_VIEW_KEY, mode)
+    } catch {
+      // Ignore
+    }
+  }, [])
+
+  // 2. URL Search Params & Filter State
+  const initialQuery = searchParams.get('q') || ''
+  const initialCollection = searchParams.get('collection') || ''
+  const initialStatus = (searchParams.get('status') || 'all') as 'all' | 'published' | 'draft'
+  const initialPage = Math.max(1, parseInt(searchParams.get('page') || '1', 10))
+
+  const [searchQuery, setSearchQuery] = useState(initialQuery)
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery)
+  const [selectedCollectionId, setSelectedCollectionId] = useState(initialCollection)
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'published' | 'draft'>(initialStatus)
+  const [page, setPage] = useState(initialPage)
+
+  // 3. Delete Modal State
   const [productToDelete, setProductToDelete] = useState<ProductListItem | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  // Debounce search input
+  // Debounce search input (300ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery.trim())
-      setPage(1)
     }, SEARCH_CONSTRAINTS.DEBOUNCE_MS)
     return () => clearTimeout(timer)
   }, [searchQuery])
 
-  // Queries
+  // Sync state to URL params cleanly
+  useEffect(() => {
+    const nextParams = new URLSearchParams()
+    if (debouncedSearch) nextParams.set('q', debouncedSearch)
+    if (selectedCollectionId) nextParams.set('collection', selectedCollectionId)
+    if (selectedStatus !== 'all') nextParams.set('status', selectedStatus)
+    if (page > 1) nextParams.set('page', page.toString())
+
+    setSearchParams(nextParams, { replace: true })
+  }, [debouncedSearch, selectedCollectionId, selectedStatus, page, setSearchParams])
+
+  // 4. Queries & Mutations
   const { data: collections } = useCollections({ activeOnly: false })
   const {
     data: productsData,
     isLoading,
+    isFetching,
     isError,
     error,
     refetch,
   } = useAdminProducts({
     searchQuery: debouncedSearch || undefined,
     collectionId: selectedCollectionId || undefined,
+    status: selectedStatus !== 'all' ? selectedStatus : undefined,
     page,
-    pageSize: 15,
+    pageSize: 16,
   })
 
   const { togglePublish, deleteProduct } = useProductMutations()
 
-  // Filter handlers
+  // 5. Filter Handlers
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val)
+    setPage(1)
+  }
+
+  const handleCollectionChange = (val: string) => {
+    setSelectedCollectionId(val)
+    setPage(1)
+  }
+
+  const handleStatusChange = (val: 'all' | 'published' | 'draft') => {
+    setSelectedStatus(val)
+    setPage(1)
+  }
+
   const handleResetFilters = () => {
     setSearchQuery('')
     setDebouncedSearch('')
@@ -70,127 +127,12 @@ export const AdminProductsPage: React.FC = () => {
     setPage(1)
   }
 
-  const hasActiveFilters = Boolean(
-    searchQuery.trim() || selectedCollectionId || selectedStatus !== 'all'
-  )
-
-  // Filter locally by published status if needed (since backend can do collection & search)
-  const rawProducts = productsData?.products || []
-  const filteredProducts = rawProducts.filter((p) => {
-    if (selectedStatus === 'published') return p.is_published
-    if (selectedStatus === 'draft') return !p.is_published
-    return true
-  })
-
-  // Table Columns Definition
-  const columns: Column<ProductListItem>[] = [
-    {
-      header: 'Product',
-      accessor: (row) => {
-        const thumbUrl = row.cover_image_path
-          ? getMediaUrl('product-images', row.cover_image_path, 'thumbnail')
-          : null
-
-        return (
-          <div className="flex items-center gap-3 min-w-[200px]">
-            <div className="w-12 h-12 rounded-none bg-[#171717] border border-[#2A2A2A] overflow-hidden shrink-0 flex items-center justify-center">
-              {thumbUrl ? (
-                <img
-                  src={thumbUrl}
-                  alt={row.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <span className="text-[10px] font-mono text-[#7A746B]">No Image</span>
-              )}
-            </div>
-            <div className="min-w-0">
-              <div className="font-medium text-[#F5F0E8] truncate">{row.name}</div>
-              <div className="text-[11px] text-[#7A746B] font-mono truncate">
-                slug: {row.slug}
-              </div>
-            </div>
-          </div>
-        )
-      },
-    },
-    {
-      header: 'Code',
-      accessor: (row) => (
-        <span className="font-mono text-xs text-[#D1CCC2]/90">
-          {row.product_code || '—'}
-        </span>
-      ),
-      className: 'hidden md:table-cell',
-    },
-    {
-      header: 'Collection',
-      accessor: (row) => (
-        <span className="text-xs text-[#D1CCC2]/90">
-          {row.collections?.name || 'Unassigned'}
-        </span>
-      ),
-      className: 'hidden sm:table-cell',
-    },
-    {
-      header: 'Price',
-      accessor: (row) => (
-        <div className="font-mono text-xs font-semibold text-[#F5F0E8]">
-          {formatCurrency(row.price, row.currency)}
-        </div>
-      ),
-    },
-    {
-      header: 'Status',
-      accessor: (row) => {
-        return (
-          <button
-            type="button"
-            onClick={() =>
-              togglePublish.mutate({ id: row.id, is_published: !row.is_published })
-            }
-            disabled={togglePublish.isPending}
-            className={`px-2.5 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-semibold border transition-all cursor-pointer ${row.is_published
-              ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/60 hover:bg-emerald-900/60'
-              : 'bg-[#171717] text-[#9B958B] border-[#2A2A2A] hover:text-[#F5F0E8]'
-              }`}
-          >
-            {row.is_published ? 'Published' : 'Draft'}
-          </button>
-        )
-      },
-    },
-    {
-      header: 'Updated',
-      accessor: (row) => (
-        <span className="text-[11px] text-[#7A746B] font-mono">
-          {formatDate(row.updated_at || row.created_at)}
-        </span>
-      ),
-      className: 'hidden lg:table-cell',
-    },
-  ]
-
-  // Row Action Renderers
-  const renderActions = (row: ProductListItem) => (
-    <div className="flex items-center justify-end gap-2">
-      <button
-        type="button"
-        onClick={() => navigate(`/admin/products/${row.id}`)}
-        className="px-2.5 py-1.5 text-xs text-[#C9A84C] hover:text-[#E8B84B] font-mono font-semibold rounded hover:bg-[#171717] transition-colors"
-      >
-        Edit
-      </button>
-      <button
-        type="button"
-        onClick={() => setProductToDelete(row)}
-        className="px-2.5 py-1.5 text-xs text-red-400 hover:text-red-300 font-mono rounded hover:bg-red-950/40 transition-colors"
-      >
-        Delete
-      </button>
-    </div>
-  )
+  const handleTogglePublish = (product: ProductListItem) => {
+    togglePublish.mutate({
+      id: product.id,
+      is_published: !product.is_published,
+    })
+  }
 
   const handleDeleteConfirm = async () => {
     if (!productToDelete) return
@@ -205,111 +147,179 @@ export const AdminProductsPage: React.FC = () => {
     }
   }
 
+  const products = useMemo(() => productsData?.products || [], [productsData?.products])
+  const totalCount = productsData?.totalCount || 0
+  const totalPages = productsData?.totalPages || 1
+
+  const isDatabaseEmpty =
+    !isLoading &&
+    totalCount === 0 &&
+    !debouncedSearch &&
+    !selectedCollectionId &&
+    selectedStatus === 'all'
+
+  const isNoFilterMatches =
+    !isLoading &&
+    totalCount === 0 &&
+    (Boolean(debouncedSearch) || Boolean(selectedCollectionId) || selectedStatus !== 'all')
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <PageHeader
-        variant="admin"
-        title="Furniture Products"
-        description="Manage solid wood furniture pieces, variants, specifications, and publication states."
-        actions={
-          <Link to="/admin/products/new">
-            <GoldButton size="sm" className="text-xs uppercase tracking-wider">
-              + Add Product
-            </GoldButton>
-          </Link>
-        }
-      />
-
-      {/* Structured DataTable with Search, Filters, and Pagination */}
-      <AdminDataTable<ProductListItem>
-        columns={columns}
-        data={filteredProducts}
-        isLoading={isLoading}
-        isError={isError}
-        errorMessage={error?.message}
-        onRetry={refetch}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Search products by title or code..."
-        hasActiveFilters={hasActiveFilters}
-        onResetFilters={handleResetFilters}
-        filterControls={
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Collection Filter */}
-            <Select
-              items={{
-                all: 'All Collections',
-                ...(collections || []).reduce((acc, col) => {
-                  acc[col.id] = col.name
-                  return acc
-                }, {} as Record<string, string>),
-              }}
-              value={selectedCollectionId || 'all'}
-              onValueChange={(val) => {
-                setSelectedCollectionId(val === 'all' || !val ? '' : val)
-                setPage(1)
-              }}
-            >
-              <SelectTrigger
-                aria-label="Filter by collection"
-                className="bg-[#111111] border-[#2A2A2A] text-[#F5F0E8] rounded-none font-mono text-xs h-9 px-3 min-w-[150px]"
-              >
-                <SelectValue placeholder="All Collections" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#111111] border-[#2A2A2A] text-[#F5F0E8] rounded-none shadow-2xl z-50">
-                <SelectGroup>
-                  <SelectItem value="all">All Collections</SelectItem>
-                  {collections?.map((col) => (
-                    <SelectItem key={col.id} value={col.id}>
-                      {col.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-
-            {/* Status Filter */}
-            <Select
-              items={{
-                all: 'All Statuses',
-                published: 'Published',
-                draft: 'Draft',
-              }}
-              value={selectedStatus}
-              onValueChange={(val) => {
-                setSelectedStatus((val || 'all') as 'all' | 'published' | 'draft')
-                setPage(1)
-              }}
-            >
-              <SelectTrigger
-                aria-label="Filter by publication status"
-                className="bg-[#111111] border-[#2A2A2A] text-[#F5F0E8] rounded-none font-mono text-xs h-9 px-3 min-w-[130px]"
-              >
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent className="bg-[#111111] border-[#2A2A2A] text-[#F5F0E8] rounded-none shadow-2xl z-50">
-                <SelectGroup>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="published">Published</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+    <div className="space-y-6 max-w-[1600px] w-full mx-auto select-none">
+      {/* 1. Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#222222]">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-sans font-semibold text-[#F5F0E8] tracking-tight">
+              Products
+            </h1>
+            {!isLoading && (
+              <span className="px-2.5 py-0.5 rounded-full bg-[#181818] border border-[#2A2A2A] text-xs font-mono text-[#9B958B]">
+                {totalCount} {totalCount === 1 ? 'product' : 'products'}
+              </span>
+            )}
+            {isFetching && !isLoading && (
+              <HugeiconsIcon icon={RefreshIcon} className="w-3.5 h-3.5 text-[#C9A84C] animate-spin" />
+            )}
           </div>
-        }
-        emptyTitle="No products found"
-        emptyDescription="No furniture pieces matched your active filter and search criteria."
-        emptyAction={
-          <Link to="/admin/products/new">
-            <GoldButton size="sm">+ Create Product</GoldButton>
-          </Link>
-        }
-        renderActions={renderActions}
-        keyExtractor={(row) => row.id}
+          <p className="text-xs sm:text-sm text-[#8A847A] font-sans font-normal leading-relaxed">
+            Manage catalogue products, pricing, media and publication status.
+          </p>
+        </div>
+
+        <Link to="/admin/products/new" className="shrink-0">
+          <GoldButton
+            size="sm"
+            icon={<HugeiconsIcon icon={PlusSignIcon} className="w-3.5 h-3.5" />}
+            className="text-xs uppercase font-mono tracking-wider font-semibold w-full sm:w-auto"
+          >
+            Add Product
+          </GoldButton>
+        </Link>
+      </div>
+
+      {/* 2. Product Command Bar (Search, Filters, View Switcher) */}
+      <AdminProductsToolbar
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
+        selectedCollectionId={selectedCollectionId}
+        onCollectionChange={handleCollectionChange}
+        selectedStatus={selectedStatus}
+        onStatusChange={handleStatusChange}
+        viewMode={viewMode}
+        onViewModeChange={handleViewModeChange}
+        collections={collections}
+        onResetFilters={handleResetFilters}
       />
 
-      {/* Explicit Delete Confirmation Dialog */}
+      {/* 3. Catalogue Workspace Area */}
+      {isLoading ? (
+        /* Loading Skeletons */
+        viewMode === 'list' ? (
+          <div className="bg-[#111111] border border-[#242424] rounded-none p-4 space-y-3">
+            {[1, 2, 3, 4, 5, 6].map((idx) => (
+              <div
+                key={idx}
+                className="h-16 bg-[#161616] rounded border border-[#222222] animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((idx) => (
+              <div
+                key={idx}
+                className="h-72 bg-[#111111] border border-[#242424] rounded-none animate-pulse"
+              />
+            ))}
+          </div>
+        )
+      ) : isError ? (
+        /* Localized Error State */
+        <div className="p-12 text-center bg-[#111111] border border-[#242424] rounded-none space-y-3">
+          <p className="text-xs sm:text-sm text-red-400 font-sans">
+            {error?.message || 'We could not load the products at this time.'}
+          </p>
+          <GoldButton onClick={() => refetch()} size="sm">
+            Try Again
+          </GoldButton>
+        </div>
+      ) : isDatabaseEmpty ? (
+        /* Empty Database State */
+        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-none space-y-3">
+          <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#7A746B] flex items-center justify-center mx-auto">
+            <HugeiconsIcon icon={PackageIcon} className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-sans font-semibold text-[#F5F0E8]">
+              No products yet
+            </h2>
+            <p className="text-xs text-[#8A847A] font-sans max-w-sm mx-auto">
+              Add your first bespoke piece to begin building the furniture catalogue.
+            </p>
+          </div>
+          <div className="pt-2">
+            <Link to="/admin/products/new">
+              <GoldButton size="sm" icon={<HugeiconsIcon icon={PlusSignIcon} className="w-3.5 h-3.5" />}>
+                Add Product
+              </GoldButton>
+            </Link>
+          </div>
+        </div>
+      ) : isNoFilterMatches ? (
+        /* No Filter Matches State */
+        <div className="py-16 px-6 text-center bg-[#111111] border border-[#242424] rounded-none space-y-3">
+          <div className="w-12 h-12 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#7A746B] flex items-center justify-center mx-auto">
+            <HugeiconsIcon icon={Search01Icon} className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-sans font-semibold text-[#F5F0E8]">
+              No products match these filters
+            </h2>
+            <p className="text-xs text-[#8A847A] font-sans max-w-sm mx-auto">
+              Try adjusting your search query, collection selection, or publication status.
+            </p>
+          </div>
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="px-4 py-2 text-xs font-sans font-medium text-[#C9A84C] hover:text-[#E8B84B] underline transition-colors cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Active Catalogue List or Grid View */
+        <div className="space-y-6">
+          {viewMode === 'list' ? (
+            <AdminProductsTable
+              products={products}
+              onTogglePublish={handleTogglePublish}
+              onDelete={(p) => setProductToDelete(p)}
+              isPendingPublish={togglePublish.isPending}
+            />
+          ) : (
+            <AdminProductGrid
+              products={products}
+              onTogglePublish={handleTogglePublish}
+              onDelete={(p) => setProductToDelete(p)}
+              isPendingPublish={togglePublish.isPending}
+            />
+          )}
+
+          {/* 4. Unified Pagination */}
+          <AdminProductsPagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={16}
+            onPageChange={setPage}
+          />
+        </div>
+      )}
+
+      {/* 5. Safe Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
         isOpen={Boolean(productToDelete)}
         recordType="Product"

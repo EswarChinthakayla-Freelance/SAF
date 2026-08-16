@@ -18,7 +18,7 @@ export const MobileInquiryRow: React.FC<MobileInquiryRowProps> = ({
     <button
       type="button"
       onClick={() => onSelect(inquiry)}
-      className="w-full text-left p-4 rounded-lg bg-[#141414] border border-[#242424] hover:border-[#383838] active:bg-[#1A1A1A] transition-colors space-y-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] cursor-pointer"
+      className="w-full text-left p-4 rounded-none bg-[#141414] border border-[#242424] hover:border-[#383838] active:bg-[#1A1A1A] transition-colors space-y-2.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A84C] cursor-pointer"
     >
       {/* Top line: Customer name + Status badge */}
       <div className="flex items-center justify-between gap-2">

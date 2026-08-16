@@ -24,7 +24,7 @@ export const DashboardStats: React.FC<DashboardStatsProps> = ({
         {[1, 2, 3, 4].map((idx) => (
           <div
             key={idx}
-            className="h-[142px] bg-[#111111] border border-[#242424] rounded-lg p-5 flex flex-col justify-between animate-pulse"
+            className="h-[142px] bg-[#111111] border border-[#242424] rounded-none p-5 flex flex-col justify-between animate-pulse"
           >
             <div className="flex items-center justify-between">
               <div className="w-24 h-3 bg-[#1F1F1F] rounded" />
