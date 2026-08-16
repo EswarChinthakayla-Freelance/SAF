@@ -33,7 +33,6 @@ const mockProducts: ProductListItem[] = [
       id: 'col-2',
       name: 'Dining & Banquet',
       slug: 'dining-banquet',
-      cover_image_path: null,
     },
   },
 ]
@@ -78,6 +77,18 @@ vi.mock('@/hooks/queries/useProducts', () => ({
   },
 }))
 
+vi.mock('@/hooks/queries/useCollections', () => ({
+  useCollections: () => ({
+    data: [
+      { id: 'col-1', name: 'Bedroom Suite', slug: 'bedroom' },
+      { id: 'col-2', name: 'Dining & Banquet', slug: 'dining' },
+    ],
+    isLoading: false,
+    isError: false,
+    error: null,
+  }),
+}))
+
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
 })
@@ -94,49 +105,57 @@ const renderSearchPage = (initialRoute = '/search') => {
   )
 }
 
-describe('SearchPage Component', () => {
+describe('SearchPage Component — "The Discovery Desk"', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('renders pre-search state when no query is present in URL', () => {
+  it('renders pre-search state with Discovery Masthead and Discovery Index when no query in URL', () => {
     renderSearchPage('/search')
 
     expect(screen.getByRole('heading', { level: 1, name: 'Find Your Furniture' })).toBeDefined()
-    expect(screen.getByText('Search our handcrafted catalogue')).toBeDefined()
-    expect(screen.getByText('Browse All Furniture')).toBeDefined()
+    expect(screen.getByText('EXPLORE THE ARCHIVE')).toBeDefined()
+    expect(screen.getByText('The Collection Atlas')).toBeDefined()
+    expect(screen.getByText('The Furniture Index')).toBeDefined()
+    expect(screen.getByText('The Spaces Gallery')).toBeDefined()
+    expect(screen.getByText('READY')).toBeDefined()
   })
 
-  it('populates search input from ?q= parameter and displays search results', () => {
+  it('populates search input from ?q= parameter and displays Query Lens and product plates', () => {
     renderSearchPage('/search?q=teak')
 
-    const input = screen.getByLabelText('Search furniture pieces') as HTMLInputElement
+    const input = screen.getByLabelText('Search furniture catalogue') as HTMLInputElement
     expect(input.value).toBe('teak')
-    expect(screen.getByText(/1 piece found for "teak"/i)).toBeDefined()
+    expect(screen.getByRole('heading', { level: 2, name: /Results for/i })).toBeDefined()
     expect(screen.getByText('Teak Grand Dining Table')).toBeDefined()
     expect(screen.getByText('₹85,000')).toBeDefined()
+    expect(screen.getByText('1 RESULT')).toBeDefined()
   })
 
-  it('displays empty results state when query matches zero products', () => {
+  it('displays architectural Zero Match composition when query matches zero products', () => {
     renderSearchPage('/search?q=nonexistent')
 
-    expect(screen.getByText('No furniture found for “nonexistent”.')).toBeDefined()
+    expect(screen.getByText(/No furniture found for/i)).toBeDefined()
+    expect(screen.getByText('ARCHIVE SEARCH // ZERO MATCHES')).toBeDefined()
+    expect(screen.getByText('Browse Complete Catalogue')).toBeDefined()
+    expect(screen.getByText('NO MATCHES')).toBeDefined()
   })
 
-  it('clears query and resets to pre-search state when clear button is clicked', () => {
+  it('clears query and resets to Discovery Index when clear button is clicked', () => {
     renderSearchPage('/search?q=teak')
 
     const clearButton = screen.getByLabelText('Clear search query')
     fireEvent.click(clearButton)
 
-    const input = screen.getByLabelText('Search furniture pieces') as HTMLInputElement
+    const input = screen.getByLabelText('Search furniture catalogue') as HTMLInputElement
     expect(input.value).toBe('')
+    expect(screen.getByText('EXPLORE THE ARCHIVE')).toBeDefined()
   })
 
   it('renders recoverable error state when search query fails', () => {
     renderSearchPage('/search?q=error-query')
 
-    expect(screen.getByText("We couldn't complete your search.")).toBeDefined()
+    expect(screen.getByText("We couldn't complete your search")).toBeDefined()
     expect(screen.getByRole('button', { name: /Try Again/i })).toBeDefined()
     expect(screen.getByText('Browse Catalogue')).toBeDefined()
   })
