@@ -63,6 +63,30 @@ export type InquiryRow = Database['public']['Tables']['inquiries']['Row']
 export type InquiryInsert = Database['public']['Tables']['inquiries']['Insert']
 export type InquiryUpdate = Database['public']['Tables']['inquiries']['Update']
 
+export interface AdminInquiryProductRef {
+  id: string
+  name: string
+  slug: string
+  is_published?: boolean
+  primary_image?: string | null
+}
+
+export interface AdminInquiryListItem extends InquiryRow {
+  product?: AdminInquiryProductRef | null
+}
+
+export interface AdminInquiryDetail extends InquiryRow {
+  product?: AdminInquiryProductRef | null
+}
+
+export interface InquiryStatusCounts {
+  all: number
+  new: number
+  read: number
+  replied: number
+  closed: number
+}
+
 export type SiteSettingsRow = Database['public']['Tables']['site_settings']['Row']
 export type SiteSettingsUpdate = Database['public']['Tables']['site_settings']['Update']
 

@@ -1,291 +1,290 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import React, { useEffect, useRef } from 'react'
+import { InquiryStatusBadge } from './inquiries/InquiryStatusBadge'
+import { InquiryCustomerCard } from './inquiries/InquiryCustomerCard'
+import { InquiryProductContext } from './inquiries/InquiryProductContext'
+import { InquiryStatusControl } from './inquiries/InquiryStatusControl'
+import { InquiryNotesEditor } from './inquiries/InquiryNotesEditor'
+import { Button } from '@/components/ui/button'
 import { formatDate, formatRelativeTime } from '@/utils/dates'
-import { GoldButton } from '@/components/brand/GoldButton'
-import { INQUIRY_STATUSES, type InquiryStatus } from '@/lib/constants'
 import { useInquiryDetail } from '@/hooks/queries/useInquiries'
-import type { InquiryRow } from '@/types/app'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Cancel01Icon,
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Comment01Icon,
+  InformationCircleIcon,
+  Delete02Icon,
+} from '@hugeicons/core-free-icons'
+import type { InquiryStatus } from '@/lib/constants'
+import type { AdminInquiryListItem, AdminInquiryDetail, InquiryRow } from '@/types/app'
 
 export interface InquiryDetailSheetProps {
-  inquiry: InquiryRow | null
+  inquiry: AdminInquiryListItem | AdminInquiryDetail | InquiryRow | null
   isOpen: boolean
   onClose: () => void
-  onUpdateInquiry: (id: string, updates: { status?: InquiryStatus; admin_notes?: string }) => Promise<void>
-}
-
-interface InquiryDetailSheetContentProps {
-  inquiry: InquiryRow
-  onClose: () => void
-  onUpdateInquiry: (id: string, updates: { status?: InquiryStatus; admin_notes?: string }) => Promise<void>
-}
-
-const InquiryDetailSheetContent: React.FC<InquiryDetailSheetContentProps> = ({
-  inquiry,
-  onClose,
-  onUpdateInquiry,
-}) => {
-  const { data: detailData } = useInquiryDetail(inquiry.id)
-  const fullInquiry = detailData || inquiry
-
-  const [status, setStatus] = useState<InquiryStatus>(inquiry.status as InquiryStatus)
-  const [adminNotes, setAdminNotes] = useState(inquiry.admin_notes || '')
-  const [isSaving, setIsSaving] = useState(false)
-
-  useEffect(() => {
-    if (detailData) {
-      if (detailData.status) setStatus(detailData.status as InquiryStatus)
-      if (detailData.admin_notes !== undefined) setAdminNotes(detailData.admin_notes || '')
-    }
-  }, [detailData])
-
-  const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      await onUpdateInquiry(inquiry.id, {
-        status,
-        admin_notes: adminNotes,
-      })
-      onClose()
-    } catch (err) {
-      console.error('Failed to update inquiry:', err)
-    } finally {
-      setIsSaving(false)
-    }
-  }
-
-  const getStatusBadge = (st: string) => {
-    const badgeColors: Record<string, string> = {
-      new: 'bg-[#C9A84C]/20 text-[#E8B84B] border-[#C9A84C]/40',
-      read: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      replied: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      closed: 'bg-stone-800 text-stone-400 border-stone-700',
-    }
-    return badgeColors[st] || badgeColors.new
-  }
-
-  const displayMessage = fullInquiry.message || inquiry.message || ''
-
-  return (
-    <div className="fixed inset-0 z-50 flex justify-end">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/75 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-
-      {/* Sheet Panel (480-560px on desktop) */}
-      <div className="relative z-10 w-full sm:max-w-lg md:max-w-xl bg-[#111111] border-l border-[#2A2A2A] h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left">
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-[#2A2A2A] flex items-center justify-between bg-[#141414]">
-          <div className="space-y-1 min-w-0 pr-4">
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-base font-serif font-semibold text-[#F5F0E8] truncate">
-                {fullInquiry.name}
-              </h2>
-              <span
-                className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded border font-semibold ${getStatusBadge(
-                  status
-                )}`}
-              >
-                {status}
-              </span>
-            </div>
-            <p className="text-[11px] text-[#7A746B] font-mono">
-              Received {formatDate(fullInquiry.created_at)} ({formatRelativeTime(fullInquiry.created_at)})
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close sheet"
-            className="p-2 text-[#9B958B] hover:text-[#F5F0E8] rounded-none transition-colors cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 p-6 space-y-6 overflow-y-auto font-sans text-xs">
-          {/* Customer Contact Details */}
-          <div className="bg-[#171717] rounded-none p-4 border border-[#2A2A2A] space-y-2.5">
-            <div className="text-[10px] uppercase font-mono text-[#7A746B] font-semibold">
-              Contact Information
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#F5F0E8]">
-              <div>
-                <span className="text-[#9B958B] block text-[11px]">Email</span>
-                <a
-                  href={`mailto:${fullInquiry.email}`}
-                  className="hover:text-[#C9A84C] font-medium break-all"
-                >
-                  {fullInquiry.email}
-                </a>
-              </div>
-              <div>
-                <span className="text-[#9B958B] block text-[11px]">Phone / WhatsApp</span>
-                {fullInquiry.phone ? (
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <a
-                      href={`tel:${fullInquiry.phone}`}
-                      className="hover:text-[#C9A84C] font-medium font-mono"
-                    >
-                      {fullInquiry.phone}
-                    </a>
-                    <a
-                      href={`https://wa.me/${fullInquiry.phone.replace(/[^0-9]/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[10px] font-mono text-emerald-400 hover:text-emerald-300 underline"
-                    >
-                      WhatsApp &rarr;
-                    </a>
-                  </div>
-                ) : (
-                  <span className="text-[#666158] font-mono text-[11px]">Not provided</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Subject & Context */}
-          {(fullInquiry.subject || fullInquiry.product_id) && (
-            <div className="space-y-1.5 bg-[#141410] border border-[#C9A84C]/30 p-4">
-              <div className="text-[10px] uppercase font-mono text-[#C9A84C] font-semibold tracking-wider">
-                Context & Product Interest
-              </div>
-              {fullInquiry.subject && (
-                <p className="text-sm font-serif font-medium text-[#F5F0E8]">
-                  {fullInquiry.subject}
-                </p>
-              )}
-              {fullInquiry.product_id && (
-                <div className="pt-1">
-                  <a
-                    href={`/admin/products/${fullInquiry.product_id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-[#C9A84C] hover:text-[#E8B84B] font-mono font-medium underline"
-                  >
-                    View Associated Product in Catalogue &rarr;
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Historical Reply Timestamp */}
-          {fullInquiry.replied_at && (
-            <div className="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-none text-emerald-300 text-[11px] font-mono flex items-center gap-2">
-              <span>✓ Replied on {formatDate(fullInquiry.replied_at)}</span>
-            </div>
-          )}
-
-          {/* Inquiry Message (Preserves linebreaks on elevated surface) */}
-          <div className="space-y-2">
-            <div className="text-[10px] uppercase font-mono text-[#7A746B] font-semibold">
-              Customer Message
-            </div>
-            <div className="bg-[#171717] border border-[#2A2A2A] rounded-none p-4 text-[#F5F0E8] text-xs leading-relaxed whitespace-pre-wrap font-sans max-h-64 overflow-y-auto">
-              {displayMessage ? (
-                displayMessage
-              ) : (
-                <span className="text-[#666158] italic font-mono text-[11px]">
-                  No message body recorded.
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Status & Management Controls */}
-          <div className="space-y-4 pt-2 border-t border-[#2A2A2A]">
-            <div className="space-y-1.5">
-              <label className="block text-[10px] uppercase font-mono text-[#7A746B] font-semibold">
-                Workflow Status
-              </label>
-              <Select
-                items={INQUIRY_STATUSES.reduce((acc, st) => {
-                  acc[st] = st.toUpperCase()
-                  return acc
-                }, {} as Record<string, string>)}
-                value={status}
-                onValueChange={(val) => setStatus((val || 'new') as InquiryStatus)}
-              >
-                <SelectTrigger className="w-full bg-[#171717] border-[#2A2A2A] text-[#F5F0E8] rounded-none h-10 px-3.5 text-xs font-mono">
-                  <SelectValue placeholder="Select Status" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#111111] border-[#2A2A2A] text-[#F5F0E8] rounded-none shadow-2xl z-50">
-                  <SelectGroup>
-                    {INQUIRY_STATUSES.map((st) => (
-                      <SelectItem key={st} value={st}>
-                        {st.toUpperCase()}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="block text-[10px] uppercase font-mono text-[#7A746B] font-semibold">
-                Internal Admin Notes
-              </label>
-              <textarea
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Log internal notes, quotes given, phone consultation records..."
-                rows={4}
-                className="w-full bg-[#171717] border border-[#2A2A2A] rounded-none p-3 text-xs text-[#F5F0E8] placeholder-[#7A746B] focus:border-[#C9A84C] outline-none resize-none leading-relaxed font-sans"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Action Bar */}
-        <div className="px-6 py-4 border-t border-[#2A2A2A] bg-[#141414] flex items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-mono text-[#9B958B] hover:text-[#F5F0E8] transition-colors cursor-pointer"
-          >
-            Cancel
-          </button>
-          <GoldButton
-            onClick={handleSave}
-            loading={isSaving}
-            size="sm"
-            className="text-xs uppercase font-mono tracking-wider font-semibold"
-          >
-            Update Inquiry
-          </GoldButton>
-        </div>
-      </div>
-    </div>
-  )
+  onUpdateStatus?: (id: string, status: InquiryStatus) => Promise<void>
+  onSaveNotes?: (id: string, notes: string) => Promise<void>
+  onUpdateInquiry?: (id: string, updates: { status?: InquiryStatus; admin_notes?: string }) => Promise<void>
+  onDeleteInquiry?: (id: string) => void
+  onPrevious?: () => void
+  onNext?: () => void
+  hasPrevious?: boolean
+  hasNext?: boolean
+  currentIndex?: number
+  totalInquiries?: number
+  isUpdatingStatus?: boolean
+  isSavingNotes?: boolean
 }
 
 export const InquiryDetailSheet: React.FC<InquiryDetailSheetProps> = ({
   inquiry,
   isOpen,
   onClose,
+  onUpdateStatus,
+  onSaveNotes,
   onUpdateInquiry,
+  onDeleteInquiry,
+  onPrevious,
+  onNext,
+  hasPrevious = false,
+  hasNext = false,
+  currentIndex,
+  totalInquiries,
+  isUpdatingStatus = false,
+  isSavingNotes = false,
 }) => {
-  if (!isOpen || !inquiry) return null
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Fetch complete inquiry details (full message, relations, notes)
+  const { data: detailData, isLoading } = useInquiryDetail(inquiry?.id)
+  const fullInquiry = detailData || (inquiry as AdminInquiryDetail | null)
+
+  // Handle Escape key to close sheet
+  useEffect(() => {
+    if (!isOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
+  if (!isOpen || !fullInquiry) return null
+
+  const displayMessage = fullInquiry.message || ''
+
+  const handleStatusChange = async (newStatus: InquiryStatus) => {
+    if (onUpdateStatus) {
+      await onUpdateStatus(fullInquiry.id, newStatus)
+    } else if (onUpdateInquiry) {
+      await onUpdateInquiry(fullInquiry.id, { status: newStatus })
+    }
+  }
+
+  const handleNotesSave = async (notes: string) => {
+    if (onSaveNotes) {
+      await onSaveNotes(fullInquiry.id, notes)
+    } else if (onUpdateInquiry) {
+      await onUpdateInquiry(fullInquiry.id, { admin_notes: notes })
+    }
+  }
 
   return (
-    <InquiryDetailSheetContent
-      key={inquiry.id}
-      inquiry={inquiry}
-      onClose={onClose}
-      onUpdateInquiry={onUpdateInquiry}
-    />
+    <div className="fixed inset-0 z-50 flex justify-end font-sans">
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-fade-in"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      {/* Sheet Slide-Over Container (540-660px on desktop, full-width on mobile) */}
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="inquiry-sheet-title"
+        className="relative z-10 w-full sm:max-w-xl md:max-w-2xl bg-[#101010] border-l border-[#262626] h-full shadow-2xl flex flex-col overflow-hidden animate-slide-left"
+      >
+        {/* Top Header Bar */}
+        <div className="px-5 sm:px-6 py-4 border-b border-[#242424] bg-[#141414] flex items-center justify-between gap-3 shrink-0">
+          <div className="space-y-1 min-w-0 pr-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2
+                id="inquiry-sheet-title"
+                className="text-base sm:text-lg font-semibold text-[#F5F0E8] truncate"
+              >
+                {fullInquiry.name}
+              </h2>
+              <InquiryStatusBadge status={fullInquiry.status} />
+            </div>
+
+            <div className="flex items-center gap-2 text-xs text-[#8A847A] font-mono">
+              <span>Received {formatRelativeTime(fullInquiry.created_at)}</span>
+              <span className="text-[#3A3A3A]">·</span>
+              <span className="text-[#666158]">
+                {formatDate(fullInquiry.created_at)}
+              </span>
+            </div>
+          </div>
+
+          {/* Header Controls: Prev/Next & Close */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {totalInquiries !== undefined && totalInquiries > 1 && (
+              <div className="hidden sm:flex items-center gap-1 mr-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onPrevious}
+                  disabled={!hasPrevious}
+                  title="Previous enquiry"
+                  aria-label="Previous enquiry"
+                  className="h-8 w-8 p-0 text-[#8A847A] hover:text-[#F5F0E8] hover:bg-[#1E1E1E] rounded disabled:opacity-20"
+                >
+                  <HugeiconsIcon icon={ArrowLeft01Icon} className="w-4 h-4" />
+                </Button>
+
+                {currentIndex !== undefined && (
+                  <span className="text-[11px] font-mono text-[#7A746B] px-1">
+                    {currentIndex + 1}/{totalInquiries}
+                  </span>
+                )}
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={onNext}
+                  disabled={!hasNext}
+                  title="Next enquiry"
+                  aria-label="Next enquiry"
+                  className="h-8 w-8 p-0 text-[#8A847A] hover:text-[#F5F0E8] hover:bg-[#1E1E1E] rounded disabled:opacity-20"
+                >
+                  <HugeiconsIcon icon={ArrowRight01Icon} className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              aria-label="Close sheet"
+              className="h-8 w-8 p-0 text-[#8A847A] hover:text-[#F5F0E8] hover:bg-[#1E1E1E] rounded"
+            >
+              <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Scrollable Sheet Content */}
+        <div className="flex-1 px-5 sm:px-6 py-5 space-y-5 overflow-y-auto">
+          {/* Customer Contact Details Card */}
+          <InquiryCustomerCard inquiry={fullInquiry} />
+
+          {/* Context & Product Interest */}
+          <InquiryProductContext inquiry={fullInquiry} />
+
+          {/* Customer Message Section (Readable Content Block) */}
+          <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 sm:p-5 space-y-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-[#1A1A1A] border border-[#2E2E2E] flex items-center justify-center text-[#C9A84C]">
+                <HugeiconsIcon icon={Comment01Icon} className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-[11px] font-sans font-medium uppercase tracking-wider text-[#8A847A]">
+                Customer Message
+              </span>
+            </div>
+
+            <div className="bg-[#0A0A0A] border border-[#202020] rounded p-4 text-[#F5F0E8] text-[13px] sm:text-sm leading-relaxed whitespace-pre-wrap font-sans">
+              {isLoading && !displayMessage ? (
+                <div className="space-y-2 animate-pulse py-2">
+                  <div className="h-3.5 bg-[#1C1C1C] rounded w-full" />
+                  <div className="h-3.5 bg-[#1C1C1C] rounded w-5/6" />
+                  <div className="h-3.5 bg-[#1C1C1C] rounded w-2/3" />
+                </div>
+              ) : displayMessage ? (
+                displayMessage
+              ) : (
+                <span className="text-[#666158] italic font-mono text-xs">
+                  No message text was submitted with this enquiry.
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Status & Workflow Selector */}
+          <InquiryStatusControl
+            status={fullInquiry.status}
+            onStatusChange={handleStatusChange}
+            repliedAt={fullInquiry.replied_at}
+            disabled={isUpdatingStatus}
+          />
+
+          {/* Internal Admin Notes Editor */}
+          <InquiryNotesEditor
+            initialNotes={fullInquiry.admin_notes}
+            onSaveNotes={handleNotesSave}
+            isSaving={isSavingNotes}
+          />
+
+          {/* Technical Metadata Section */}
+          <div className="bg-[#141414] border border-[#262626] rounded-lg p-4 space-y-2.5 text-xs">
+            <div className="flex items-center gap-2 text-[#8A847A]">
+              <HugeiconsIcon icon={InformationCircleIcon} className="w-3.5 h-3.5 text-[#C9A84C]" />
+              <span className="text-[11px] font-sans font-medium uppercase tracking-wider">
+                Technical Record Details
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-mono text-[11px] text-[#7A746B]">
+              <div>
+                <span className="text-[#555048] block">Inquiry ID</span>
+                <span className="text-[#9B958B] select-all">{fullInquiry.id}</span>
+              </div>
+              <div>
+                <span className="text-[#555048] block">Origin Source</span>
+                <span className="text-[#9B958B] capitalize">{fullInquiry.source || 'Website'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Bar with Close & Secondary Delete */}
+        <div className="px-5 sm:px-6 py-3.5 border-t border-[#242424] bg-[#141414] flex items-center justify-between gap-3 shrink-0">
+          {onDeleteInquiry ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onDeleteInquiry(fullInquiry.id)}
+              className="h-8 px-2.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-950/40 rounded transition-colors"
+            >
+              <HugeiconsIcon icon={Delete02Icon} className="w-3.5 h-3.5 mr-1" />
+              <span>Delete Enquiry</span>
+            </Button>
+          ) : (
+            <div />
+          )}
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="h-8 px-4 text-xs bg-[#1C1C1C] border-[#2E2E2E] text-[#F5F0E8] hover:bg-[#262626]"
+          >
+            Done
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 

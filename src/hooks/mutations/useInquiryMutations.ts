@@ -48,6 +48,7 @@ export function useInquiryMutations() {
       queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.detail(data.id) })
       queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.newCount() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.counts() })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.metrics() })
     },
     retry: false,
@@ -64,6 +65,7 @@ export function useInquiryMutations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.newCount() })
+      queryClient.invalidateQueries({ queryKey: queryKeys.inquiries.counts() })
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.metrics() })
     },
     retry: false,

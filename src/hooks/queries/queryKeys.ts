@@ -85,6 +85,7 @@ export const queryKeys = {
       [...queryKeys.inquiries.lists(), normalizeQueryKeyFilters(filters)] as const,
     recent: (limit = 10) => [...queryKeys.inquiries.all, 'recent', limit] as const,
     newCount: () => [...queryKeys.inquiries.all, 'new-count'] as const,
+    counts: () => [...queryKeys.inquiries.all, 'counts'] as const,
     details: () => [...queryKeys.inquiries.all, 'detail'] as const,
     detail: (id: string) => [...queryKeys.inquiries.details(), id] as const,
   },

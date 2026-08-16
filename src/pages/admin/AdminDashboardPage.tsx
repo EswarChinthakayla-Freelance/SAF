@@ -102,7 +102,7 @@ export const AdminDashboardPage: React.FC = () => {
         inquiry={selectedInquiry}
         isOpen={isDetailOpen}
         onClose={handleCloseDetail}
-        onUpdateInquiry={async (id, updates) => {
+        onUpdateInquiry={async (id: string, updates) => {
           await updateInquiry.mutateAsync({ id, ...updates })
         }}
       />
