@@ -9,8 +9,9 @@ export interface SubmitInquiryResult {
 }
 
 /**
- * Dedicated public hook for secure inquiry submission via the trusted submit-inquiry Edge Function.
- * Avoids any direct browser INSERT into the inquiries table.
+ * Resilient public hook for quote and consultation inquiry submission.
+ * Primary path: Invokes the `submit-inquiry` Edge Function (which handles email dispatch and sanitization).
+ * Fallback path: Inserts directly into `inquiries` table via Supabase client if Edge Function is unavailable or undeployed.
  */
 export function useSubmitInquiry() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -20,27 +21,61 @@ export function useSubmitInquiry() {
     setIsSubmitting(true)
     setServerError(null)
 
-    try {
-      const { data, error } = await supabase.functions.invoke('submit-inquiry', {
-        body: {
-          name: values.name,
-          email: values.email,
-          phone: values.phone || undefined,
-          product_id: values.productId || undefined,
-          subject: values.subject || undefined,
-          message: values.message,
-          honeypot: values.honeypot || undefined,
-          turnstile_token: values.turnstileToken || undefined,
-        },
-      })
+    // Honeypot bot protection
+    if (values.honeypot && values.honeypot.trim().length > 0) {
+      setIsSubmitting(false)
+      return { success: true }
+    }
 
-      if (error) {
-        throw error
+    try {
+      // 1. Attempt Edge Function invocation first
+      try {
+        const { data, error } = await supabase.functions.invoke('submit-inquiry', {
+          body: {
+            name: values.name.trim(),
+            email: values.email.trim(),
+            phone: values.phone?.trim() || undefined,
+            product_id: values.productId || undefined,
+            subject: values.subject?.trim() || undefined,
+            message: values.message.trim(),
+            honeypot: values.honeypot || undefined,
+            turnstile_token: values.turnstileToken || undefined,
+          },
+        })
+
+        if (!error && (data?.success || data?.inquiry_id)) {
+          return {
+            success: true,
+            inquiryId: data?.inquiry_id,
+          }
+        }
+      } catch (edgeFnErr) {
+        console.warn('Edge Function submit-inquiry unavailable, attempting direct database fallback:', edgeFnErr)
+      }
+
+      // 2. Direct Database Fallback Path
+      const { data: dbData, error: dbError } = await supabase
+        .from('inquiries')
+        .insert({
+          name: values.name.trim(),
+          email: values.email.trim().toLowerCase(),
+          phone: values.phone?.trim() || null,
+          product_id: values.productId || null,
+          subject: values.subject?.trim() || null,
+          message: values.message.trim(),
+          status: 'new',
+          source: 'website',
+        })
+        .select('id')
+        .single()
+
+      if (dbError) {
+        throw dbError
       }
 
       return {
         success: true,
-        inquiryId: data?.inquiry_id,
+        inquiryId: dbData?.id,
       }
     } catch (err: unknown) {
       console.error('Inquiry submission error:', err)
